@@ -1,4 +1,4 @@
-#include "Header Files/Camera.h"
+#include "Camera.h"
 
 int main()
 {

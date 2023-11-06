@@ -1,5 +1,5 @@
-#include "../Header Files/Camera.h"
-#include "../Header Files/PPMWriter.h"
+#include "Camera.h"
+#include "PPMWriter.h"
 
 #include<iostream>
 

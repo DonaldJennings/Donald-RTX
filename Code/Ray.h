@@ -1,4 +1,4 @@
-#include "./GeoVec.h"
+#include "GeoVec.h"
 
 #pragma once
 class Ray
@@ -7,8 +7,8 @@ class Ray
 	GeoVec origin;
 	GeoVec direction;
 
-	Ray::Ray();
-	Ray::Ray(GeoVec origin, GeoVec direction);
-	GeoVec Ray::at(double t);
+	Ray();
+	Ray(GeoVec origin, GeoVec direction);
+	GeoVec at(double t);
 };
 

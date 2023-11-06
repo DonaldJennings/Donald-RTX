@@ -5,7 +5,6 @@ class Camera
 {
 	public:
 	Camera();
-
 	void render();
 
 	private:
@@ -23,7 +22,5 @@ class Camera
 		// Viewport Settings
 		double viewport_height = 2.0;
 		double viewport_width = viewport_height * (width / height);
-
-
 };
 

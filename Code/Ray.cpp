@@ -1,4 +1,4 @@
-#include "../Header Files/Ray.h"
+#include "Ray.h"
 
 Ray::Ray(GeoVec origin, GeoVec direction)
 {

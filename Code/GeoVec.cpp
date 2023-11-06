@@ -1,4 +1,4 @@
-#include "../Header Files/GeoVec.h"
+#include "GeoVec.h"
 
 #include<cmath>
 

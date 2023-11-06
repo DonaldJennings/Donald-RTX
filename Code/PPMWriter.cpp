@@ -1,5 +1,5 @@
-#include "../Header Files/PPMWriter.h"
-#include "../Header Files/Colour.h"
+#include "PPMWriter.h"
+#include "Colour.h"
 #include<iostream>
 
 void PPMWriter::writeHeader(std::ostream& out, int width, int height)
