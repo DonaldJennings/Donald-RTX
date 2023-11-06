@@ -142,8 +142,8 @@ double GeoVec::dot(const GeoVec& v)
 
 GeoVec GeoVec::normalize()
 {
-	double mag = magnitude();
-	return GeoVec(x / mag, y / mag, z / mag);
+	// return unit vector
+	return *this / magnitude();
 }
 
 GeoVec GeoVec::cross(const GeoVec& v)

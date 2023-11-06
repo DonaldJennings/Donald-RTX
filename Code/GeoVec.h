@@ -38,3 +38,19 @@ class GeoVec
 	GeoVec cross(const GeoVec& v);
 };
 
+inline GeoVec operator*(const double& f, const GeoVec& v)
+{
+	return GeoVec(v.x * f, v.y * f, v.z * f);
+}
+
+inline GeoVec operator/(const double& f, const GeoVec& v)
+{
+	return GeoVec(v.x / f, v.y / f, v.z / f);
+}
+
+inline GeoVec operator+(const double& f, const GeoVec& v)
+{
+	return GeoVec(v.x + f, v.y + f, v.z + f);
+}
+
+
