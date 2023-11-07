@@ -22,35 +22,36 @@ Camera::Camera()
 	aspect_ratio = 16.0 / 9.0;
 	height = static_cast<int>(width / aspect_ratio);
 
-	look_at = GeoVec(0, 0, 1);
-	up_vector = GeoVec(0, 1, 0);
+	camera_pos = GeoVec(0.0, 0.0, 0.0);
+	look_at_vec = GeoVec(0.0, 0.0, 1.0);
+	up_vector = GeoVec(0.0, 1.0, 0.0);
 
-	// Camera Position Settings
-	camera_pos = GeoVec(0,0,0); // x=0, y=0, z=0
-	// calculate viewport height with fov and focal length
-
-	focal_length = (camera_pos - look_at).magnitude();
-	fov = 90.0;
-
-	auto theta = fov * pi / 360.0;
-	viewport_height = 2.0 * tan(theta/2) * focal_length;
-	viewport_width = viewport_height * (static_cast<double>(width) / height);
-	
-	w = unitVector(camera_pos - look_at);
-	u = unitVector(cross(up_vector, w));
-	v = cross(w, u);
-	
-	viewport_u = viewport_width * u;
-	viewport_v = viewport_height * -v;
-
-	horizontal_pixel_change = viewport_u / (width);
-	vertical_pixel_change = viewport_v / (height);
-	upper_left = camera_pos - (focal_length * w) - (0.5 * viewport_u) - (0.5 * viewport_v);
-	pixel_origin = upper_left + 0.5 * (horizontal_pixel_change + vertical_pixel_change);
+	fov = 90;
 }
+
+void Camera::refresh()
+{
+	double fov_radians = fov * (pi / 180);
+	focal_length = (camera_pos - look_at_vec).length();
+    viewport_height = 2.0 * tan(fov_radians / 2) * focal_length;
+    viewport_width = viewport_height * (static_cast<double>(width)/height);
+
+	w = (camera_pos - look_at_vec).normalize();
+	u = (cross(up_vector, w)).normalize();
+	v = cross(w, u);
+
+    viewport_u = viewport_width * u;
+    viewport_v = viewport_height * -v;
+    horizontal_pixel_change = viewport_u / width;
+    vertical_pixel_change = viewport_v / height;
+    upper_left = camera_pos - (focal_length * w) - (0.5 * viewport_u) - (0.5 * viewport_v);
+    pixel_origin = upper_left + 0.5 * (horizontal_pixel_change + vertical_pixel_change);
+}
+
 
 void Camera::render(World& scene_hittables, RenderMode render_mode)
 {
+	refresh();
 	PPMWriter::writeHeader(std::cout, width, height);
 	for (int j = 0; j < height; ++j)
 	{
@@ -66,15 +67,13 @@ void Camera::render(World& scene_hittables, RenderMode render_mode)
 	}
 }
 
-GeoVec Camera::computeColour(Ray& ray, World& scene_hittables)
+GeoVec Camera::computeColour(Ray& ray, World& world)
 {
 	HitRecord hit_record;
-	if (scene_hittables.hit(ray, 0, std::numeric_limits<double>::infinity(), hit_record))
+	if (world.hit(ray, 0, std::numeric_limits<double>::infinity(), hit_record))
 	{
 		GeoVec normal = hit_record.normal;
 		return 0.5 * (normal + 1);
 	}
-	GeoVec unit_direction = ray.direction.normalize();
-	double t = 0.5 * (unit_direction.y + 1.0);
-	return (1.0 - t) * GeoVec(1.0, 1.0, 1.0) + t * GeoVec(0.5, 0.7, 1.0);
+	return world.backgroundColour;
 }

@@ -13,17 +13,14 @@ class Camera
 		void setPosition(GeoVec camera_pos) { camera_pos = camera_pos; };
 		void setWidth(int width) { this->width = width; };
 		void setHeight(int height) { this->height = height; };
-		void setFocalLength(double focal_length) { this->focal_length = focal_length; };
-		void setLookAt(GeoVec look_at) { this->look_at = look_at; };
-		void setAspectRatio(double aspect_ratio) { this->aspect_ratio = aspect_ratio; };
-		void setExposure(double exposure) { this->exposure = exposure; };
-		void setUpVector(GeoVec up_vector) { this->up_vector = up_vector; };
 		void setFOV(double fov) { this->fov = fov; };
-
+		void look_at(GeoVec look_at) { this->look_at_vec = look_at; };
+		void set_up(GeoVec up_vector) { this->up_vector = up_vector; };
+	
 	private:
 		// Camera Settigns
 		GeoVec camera_pos;
-		GeoVec look_at;
+		GeoVec look_at_vec;
 		GeoVec up_vector;
 		double exposure;
 		double fov;
@@ -44,5 +41,6 @@ class Camera
 		double viewport_width;
 
 		GeoVec computeColour(Ray& ray, World& scene_hittables);
+		void refresh();
 
 };

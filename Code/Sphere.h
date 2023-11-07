@@ -1,4 +1,4 @@
-
+#pragma once
 #include "Hittable.h"
 #include "GeoVec.h"
 #include <cmath>
@@ -12,9 +12,9 @@ public:
     bool hit(Ray& ray, double t_min, double t_max, HitRecord& hitRecord) const override
     {
         GeoVec oc = ray.origin - center;
-        auto a = ray.direction.dot(ray.direction);
-        auto b = 2.0 * oc.dot(ray.direction);
-        auto c = oc.dot(oc) - radius * radius;
+        auto a = dot(ray.direction, ray.direction);
+        auto b = 2.0 * dot(oc, ray.direction);
+        auto c = dot(oc, oc) - radius * radius;
         auto discriminant = b * b - 4 * a * c;
 
         if (discriminant > 0)

@@ -9,7 +9,7 @@ struct HitRecord {
 
     // Write a function to set normal face
     inline void set_face_normal(Ray r, GeoVec outward_normal) {
-        front_face = r.direction.dot(outward_normal) < 0;
+        front_face = dot(r.direction, outward_normal) < 0;
         normal = front_face ? outward_normal : -outward_normal;
     }
 };
