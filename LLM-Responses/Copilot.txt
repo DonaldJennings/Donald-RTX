@@ -1,5 +1,5 @@
 
-"Sphere class should inherit from abstract class and define hit method"
+"Sphere should inherit from Hittable abstract class and define it's hit method"
 
 #include "Hittable.h"
 #include "Vec3.h"
@@ -44,3 +44,22 @@ public:
 };
 
 Rework needed as this is not consistent with the codebase
+
+
+
+
+
+
+
+
+// Write a function to set normal face
+inline void set_face_normal(Ray r, GeoVec outward_normal) {
+    front_face = r.direction.dot(outward_normal) < 0;
+    normal = front_face ? outward_normal : -outward_normal;
+}
+
+// Functiont to negate a vector
+inline GeoVec operator-(const GeoVec& v)
+{
+	return GeoVec(-v.x, -v.y, -v.z);
+}

@@ -9,21 +9,19 @@ SceneParser::SceneParser()
 {
 }
 
-json SceneParser::parseScene(const char *filename)
+// json parse stream from filename
+json SceneParser::parseScene(const char* filename)
 {
-    // attempt to open file with filename
-    std::ifstream sceneFile(filename);
-
-    if (!sceneFile.is_open())
+    // open file
+    std::ifstream scene_file(filename);
+    if (!scene_file.is_open())
     {
-        throw std::exception();
+        std::cerr << "Error: Could not open scene file" << std::endl;
+        return json();
     }
 
-    // read file into json object
+    // parse scene
     json scene;
-    sceneFile >> scene;
+    scene_file >> scene;
     return scene;
 }
-
-
-

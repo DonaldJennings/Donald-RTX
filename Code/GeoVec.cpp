@@ -56,70 +56,6 @@ GeoVec GeoVec::operator/(const double& f)
 	return GeoVec(x / f, y / f, z / f);
 }
 
-GeoVec GeoVec::operator+=(const GeoVec& v)
-{
-	x += v.x;
-	y += v.y;
-	z += v.z;
-	return *this;
-}	
-
-GeoVec GeoVec::operator-=(const GeoVec& v)
-{
-	x -= v.x;
-	y -= v.y;
-	z -= v.z;
-	return *this;
-}
-
-GeoVec GeoVec::operator*=(const GeoVec& v)
-{
-	x *= v.x;
-	y *= v.y;
-	z *= v.z;
-	return *this;
-}
-
-GeoVec GeoVec::operator/=(const GeoVec& v)
-{
-	x /= v.x;
-	y /= v.y;
-	z /= v.z;
-	return *this;
-}
-
-GeoVec GeoVec::operator+=(const double& f)
-{
-	x += f;
-	y += f;
-	z += f;
-	return *this;
-}
-
-GeoVec GeoVec::operator-=(const double& f)
-{
-	x -= f;
-	y -= f;
-	z -= f;
-	return *this;
-}
-
-GeoVec GeoVec::operator*=(const double& f)
-{
-	x *= f;
-	y *= f;
-	z *= f;
-	return *this;
-}
-
-GeoVec GeoVec::operator/=(const double& f)
-{
-	x /= f;
-	y /= f;
-	z /= f;
-	return *this;
-}
-
 bool GeoVec::operator==(const GeoVec& v)
 {
 	return (x == v.x && y == v.y && z == v.z);
@@ -144,9 +80,4 @@ GeoVec GeoVec::normalize()
 {
 	// return unit vector
 	return *this / magnitude();
-}
-
-GeoVec GeoVec::cross(const GeoVec& v)
-{
-	return GeoVec((y * v.z) - (z * v.y), (z * v.x) - (x * v.z), (x * v.y) - (y * v.x));
 }

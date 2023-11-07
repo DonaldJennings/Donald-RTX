@@ -6,5 +6,5 @@ class SceneParser
 {
 public:
     SceneParser();
-    static json parseScene(const char *filename);
+    static json parseScene(const char* filename);
 };

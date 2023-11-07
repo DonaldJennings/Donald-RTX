@@ -1,37 +1,48 @@
 #pragma once
 #include "GeoVec.h"
+#include "World.h"
+#include "Ray.h"
+#include "PPMWriter.h"
+#include "RenderMode.h"
 
 class Camera
 {
 	public:
-	Camera();
-	void render();
+		Camera();
+		void render(World& scene_hittables, RenderMode render_mode);
+		void setPosition(GeoVec camera_pos) { camera_pos = camera_pos; };
+		void setWidth(int width) { this->width = width; };
+		void setHeight(int height) { this->height = height; };
+		void setFocalLength(double focal_length) { this->focal_length = focal_length; };
+		void setLookAt(GeoVec look_at) { this->look_at = look_at; };
+		void setAspectRatio(double aspect_ratio) { this->aspect_ratio = aspect_ratio; };
+		void setExposure(double exposure) { this->exposure = exposure; };
+		void setUpVector(GeoVec up_vector) { this->up_vector = up_vector; };
+		void setFOV(double fov) { this->fov = fov; };
 
 	private:
-		// Camera Settings
-		double aspect_ratio = 16.0 / 9.0;
-		int width = 1920;
-		int height = static_cast<int>(width / aspect_ratio);
-		
-		// Camera Position Settings
-		GeoVec camera_pos = GeoVec(0,0,0); // x=0, y=0, z=0
-		
-		// Determine viewport vectors
+		// Camera Settigns
+		GeoVec camera_pos;
+		GeoVec look_at;
+		GeoVec up_vector;
+		double exposure;
+		double fov;
+		double aspect_ratio;
+		double focal_length;
 
+		GeoVec u,v,w;
+		// Viewport
+		GeoVec pixel_origin;
+		GeoVec viewport_u;
+		GeoVec viewport_v;
+		GeoVec horizontal_pixel_change;
+		GeoVec vertical_pixel_change;
+		GeoVec upper_left;
+		int width;
+		int height;
+		double viewport_height;
+		double viewport_width;
 
-		// Viewport Settings
-		double viewport_height = 2.0;
-		double viewport_width = viewport_height * (width / height);
+		GeoVec computeColour(Ray& ray, World& scene_hittables);
 
-		// Horizontal viewport vecotr
-		GeoVec horizontal = GeoVec(viewport_width, 0, 0);
-		GeoVec vertical = GeoVec(0, -viewport_height, 0);
-
-		// Pixel change vectors
-		GeoVec horizontal_pixel_change = horizontal / (width);
-		GeoVec vertical_pixel_change = vertical / (height);
-
-		// Upper left pixel location
-		GeoVec upper_left = camera_pos - GeoVec(0, 0, 1) - horizontal/2 - vertical/2;
-		GeoVec pixel_origin = upper_left + 0.5 * horizontal_pixel_change + vertical_pixel_change;
 };

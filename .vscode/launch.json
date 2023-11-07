@@ -1,16 +1,16 @@
 {
-    "version": "0.2.0",
+    "version": "0.2",
     "configurations": [
         {
-            "name": "Debug Raytracing Executable",
+            "name": "C/C++ Debug",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/Code/raytracer", // replace with the path to your executable
-            "args": [> render.ppm], // any command line arguments to your program
-            "stopAtEntry": false,
+            "program": "${workspaceFolder}/Code/raytracer",  // Adjust the path to your executable
+            "args": [],  // Add any command-line arguments here
+            "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": false,
+            "externalConsole": true,
             "MIMode": "gdb",
             "setupCommands": [
                 {
