@@ -179,3 +179,45 @@ private:
 };
 #endif // TRIANGLE_H
 
+
+define material class using these properties 
+
+                    { 
+                        "ks":0.1, 
+                        "kd":0.9, 
+                        "specularexponent":20, 
+                        "diffusecolor":[0.5, 0.5, 0.8],
+                        "specularcolor":[1.0,1.0,1.0],
+                        "isreflective":false,
+                        "reflectivity":1.0,
+                        "isrefractive":false,
+                        "refractiveindex":1.0 
+                    } 
+
+
+>>> 
+
+
+#include <vector>
+#include "GeoVec.h"
+
+class Material {
+public:
+    Material() : ks(0.0), kd(0.0), specularExponent(0.0), diffuseColor(0.0, 0.0, 0.0), specularColor(0.0, 0.0, 0.0), 
+                 isReflective(false), reflectivity(0.0), isRefractive(false), refractiveIndex(1.0) {}
+
+    Material(double ks, double kd, double specularExponent, GeoVec diffuseColor, GeoVec specularColor, 
+             bool isReflective, double reflectivity, bool isRefractive, double refractiveIndex)
+        : ks(ks), kd(kd), specularExponent(specularExponent), diffuseColor(diffuseColor), specularColor(specularColor), 
+          isReflective(isReflective), reflectivity(reflectivity), isRefractive(isRefractive), refractiveIndex(refractiveIndex) {}
+
+    double ks;              // The specular reflection constant
+    double kd;              // The diffuse reflection constant
+    double specularExponent; // The specular exponent
+    GeoVec diffuseColor;    // The basic color of the material
+    GeoVec specularColor;   // The color of the specular highlight
+    bool isReflective;      // Whether the material is reflective
+    double reflectivity;    // The reflectivity of the material
+    bool isRefractive;      // Whether the material is refractive
+    double refractiveIndex; // The refractive index of the material
+};

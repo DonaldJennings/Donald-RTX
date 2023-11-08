@@ -11,6 +11,8 @@ public:
     Cylinder(GeoVec center, GeoVec axis, double radius, double height)
         : center(center), axis(axis), radius(radius), height(2.0*height) { this->center.y -= height;}
 
+    void set_material(Material mat) { this->mat = mat; }
+    
     // define the hit function
     bool hit(Ray& r, Interval ray_interval, HitRecord& rec) const override
     {
@@ -91,7 +93,7 @@ public:
         rec.t = root1;
         rec.point = hit_point;
         rec.normal = outward_normal;
-
+        rec.material_ptr = std::make_shared<Material>(mat);
         return true;
     }
 
@@ -100,4 +102,5 @@ public:
     GeoVec axis;
     double radius;
     double height;
+    Material mat;
 };

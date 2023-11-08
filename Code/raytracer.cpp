@@ -3,10 +3,12 @@
 #include "Sphere.h"
 #include "nlohmann/json.hpp"
 #include "Ray.h"
-#include "BinaryRender.h"
+#include "RenderMode.h"
 #include "Cylinder.h"
 #include "GeoVec.h"
+#include "BinaryRender.h"
 #include "Triangle.h"
+#include "Material.h"
 #include <iostream>
 #include <fstream>
 
@@ -30,35 +32,60 @@ json parseScene(const char* filename)
 
 int main()
 {
-	Camera camera;	
+	Camera camera;
+	
 	json parsed_scene = parseScene("../Scenes/scene.json");
 
 	World world;
+	
+	// Add shapes to the world
 	for (auto& shape : parsed_scene["scene"]["shapes"])
 	{
+		auto material = shape["material"];
+		double ks = material["ks"].get<double>();
+		double kd = material["kd"].get<double>();
+		int specularexponent = material["specularexponent"].get<int>();
+		GeoVec diffusecolor = GeoVec(material["diffusecolor"][0], material["diffusecolor"][1], material["diffusecolor"][2]);
+		GeoVec specularcolor = GeoVec(material["specularcolor"][0], material["specularcolor"][1], material["specularcolor"][2]);
+		bool isreflective = material["isreflective"].get<bool>();
+		bool isrefractive = material["isrefractive"].get<bool>();
+		double reflectivity = material["reflectivity"].get<double>();
+		double refractiveindex = material["refractiveindex"].get<double>();
+
+		Material material_obj(ks, kd, specularexponent, diffusecolor, specularcolor, isreflective, reflectivity, isrefractive, refractiveindex);
+		
 		if (shape["type"] == "sphere")
 		{
-			auto sphere = std::make_shared<Sphere>(GeoVec(shape["center"][0], shape["center"][1], shape["center"][2]), shape["radius"]);
-			world.add(sphere);
+			auto center = GeoVec(shape["center"][0], shape["center"][1], shape["center"][2]);
+			double radius = shape["radius"].get<double>();
+
+			Sphere sphere(center, radius);
+			sphere.set_material(material_obj);
+
+			world.add(std::make_shared<Sphere>(sphere));
 		}
 		else if (shape["type"] == "cylinder")
 		{
-			auto cylinder = std::make_shared<Cylinder>(
-				GeoVec(shape["center"][0], shape["center"][1], shape["center"][2]),
-				GeoVec(shape["axis"][0], shape["axis"][1], shape["axis"][2]),
-				shape["radius"],
-				shape["height"]
-				);
-			world.add(cylinder);
+			auto center { GeoVec(shape["center"][0], shape["center"][1], shape["center"][2]) };
+			auto axis { GeoVec(shape["axis"][0], shape["axis"][1], shape["axis"][2]) };
+			double radius { shape["radius"].get<double>() };
+			double height { shape["height"].get<double>() };
+
+			Cylinder cylinder(center, axis, radius, height);
+			cylinder.set_material(material_obj);
+
+			world.add(std::make_shared<Cylinder>(cylinder));
 		}
 		else if (shape["type"] == "triangle")
 		{
-			auto triangle = std::make_shared<Triangle>(
-				GeoVec(shape["v0"][0], shape["v0"][1], shape["v0"][2]),
-				GeoVec(shape["v1"][0], shape["v1"][1], shape["v1"][2]),
-				GeoVec(shape["v2"][0], shape["v2"][1], shape["v2"][2])
-				);
-			world.add(triangle);
+			auto v0 { GeoVec(shape["v0"][0], shape["v0"][1], shape["v0"][2]) };
+			auto v1 { GeoVec(shape["v1"][0], shape["v1"][1], shape["v1"][2]) };
+			auto v2 { GeoVec(shape["v2"][0], shape["v2"][1], shape["v2"][2]) };
+
+			Triangle triangle(v0, v1, v2);
+			triangle.set_material(material_obj);
+			
+			world.add(std::make_shared<Triangle>(triangle));
 		}
 		else
 		{
@@ -72,8 +99,10 @@ int main()
 	camera.go_to(GeoVec(parsed_scene["camera"]["position"][0], parsed_scene["camera"]["position"][1], parsed_scene["camera"]["position"][2]));
 	camera.look_at(GeoVec(parsed_scene["camera"]["lookAt"][0], parsed_scene["camera"]["lookAt"][1], parsed_scene["camera"]["lookAt"][2]));
 	camera.set_up(GeoVec(parsed_scene["camera"]["upVector"][0], parsed_scene["camera"]["upVector"][1], parsed_scene["camera"]["upVector"][2]));
-	// render scene
-
+	
+	// Set up Render Mode
 	BinaryRender binary_render;
+
+	// render scene
 	camera.render(world, binary_render);
 }

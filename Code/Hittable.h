@@ -1,6 +1,7 @@
 #pragma once
 #include "Ray.h"
 #include "HitRecord.h"
+#include "Material.h"
 #include "Interval.h"
 
 class Hittable {
