@@ -1,34 +1,30 @@
 
-# Compiler
+# Define compiler and flags
 CXX = g++
+CXXFLAGS = -Wall -Wextra -pedantic -std=c++11
 
-# Compiler flags
-CXXFLAGS = -Wall -Wextra -std=c++17
+# Define source and object file directories
+SRCDIR = .
+OBJDIR = obj
 
-# Source files
-SRCS = $(wildcard *.cpp)
+# Define source and object files
+SRCS = $(wildcard $(SRCDIR)/*.cpp)
+OBJS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SRCS))
 
-# Object files
-OBJS = $(addprefix obj/,$(notdir $(SRCS:.cpp=.o)))
-
-# Target executable
+# Define target executable
 TARGET = raytracer
 
-# Rule to compile object files
-obj/%.o: %.cpp
+# Default target
+all: $(TARGET)
+
+# Rule to create object files
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Rule to link object files into executable
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
-# Rule to create obj directory if it doesn't exist
-obj:
-	mkdir obj
-
-# Default rule
-all: obj $(TARGET)
-
 # Clean rule
 clean:
-	rm -rf obj $(TARGET)
+	rm -f $(OBJDIR)/*.o $(TARGET)

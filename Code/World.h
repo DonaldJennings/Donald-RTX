@@ -6,6 +6,7 @@
 #include "Sphere.h"
 #include "Cylinder.h"
 #include "nlohmann/json.hpp"
+#include "Interval.h"
 
 using json = nlohmann::json;
 
@@ -22,14 +23,14 @@ public:
         hittables.clear();
     }
 
-    bool hit(Ray& ray, double t_min, double t_max, HitRecord& hitRecord)
+    bool hit(Ray& ray, Interval ray_interval, HitRecord& hitRecord)
     {
         HitRecord temp_record;
         bool hitAnything = false;
-        auto closestSoFar = t_max;
+        auto closestSoFar = ray_interval.end();
 
         for (const auto& hittable : hittables) {
-            if (hittable->hit(ray, t_min, closestSoFar, temp_record)) {
+            if (hittable->hit(ray, Interval(ray_interval.start(), closestSoFar), temp_record)) {
                 hitAnything = true;
                 closestSoFar = temp_record.t;
                 hitRecord = temp_record;

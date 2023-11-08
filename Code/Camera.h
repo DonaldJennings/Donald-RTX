@@ -1,18 +1,19 @@
 #pragma once
-#include "GeoVec.h"
 #include "World.h"
 #include "Ray.h"
 #include "PPMWriter.h"
 #include "RenderMode.h"
+#include "GeoVec.h"
+#include "Interval.h"
 
 class Camera
 {
 	public:
 		Camera();
 		void render(World& scene_hittables, RenderMode render_mode);
-		void setPosition(GeoVec camera_pos) { camera_pos = camera_pos; };
-		void setWidth(int width) { this->width = width; };
-		void setHeight(int height) { this->height = height; };
+		void set_width(int width) { this->width = width; };
+		void set_height(int height) { this->height = height; };
+		void go_to(GeoVec camera_pos) { this->camera_pos = camera_pos; };
 		void setFOV(double fov) { this->fov = fov; };
 		void look_at(GeoVec look_at) { this->look_at_vec = look_at; };
 		void set_up(GeoVec up_vector) { this->up_vector = up_vector; };

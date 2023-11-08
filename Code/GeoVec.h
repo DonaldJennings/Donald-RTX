@@ -1,102 +1,93 @@
 #pragma once
 #include <cmath>
 
-class GeoVec {
-public:
-    float x, y, z;
+class GeoVec
+{
+    public:
+        double x,y,z;
 
-    GeoVec() : x(0), y(0), z(0) {}
-    GeoVec(float x, float y, float z) : x(x), y(y), z(z) {}
+        GeoVec() : x(0), y(0), z(0) {}
+        GeoVec(double x, double y, double z) : x(x), y(y), z(z) {}
 
-    // Unary operators
-    GeoVec operator-() const {
-        return GeoVec(-x, -y, -z);
-    }
+        GeoVec operator*= (const double& scalar)
+        {
+            x *= scalar;
+            y *= scalar;
+            z *= scalar;
+            return *this;
+        }
 
-    // Binary operators
-    GeoVec operator+(const GeoVec& other) const {
-        return GeoVec(x + other.x, y + other.y, z + other.z);
-    }
+        GeoVec operator/= (const double& scalar)
+        {
+            x /= scalar;
+            y /= scalar;
+            z /= scalar;
+            return *this;
+        }
 
-	GeoVec operator+(const float& other) const
-	{
-		return GeoVec(x + other, y + other, z + other);
-	}
+        double length() const
+        {
+            return sqrt(x*x + y*y + z*z);
+        }
 
-    GeoVec operator-(const GeoVec& other) const {
-        return GeoVec(x - other.x, y - other.y, z - other.z);
-    }
-
-    GeoVec operator*(float scalar) const {
-        return GeoVec(x * scalar, y * scalar, z * scalar);
-    }
-
-    GeoVec operator/(float scalar) const {
-        return GeoVec(x / scalar, y / scalar, z / scalar);
-    }
-
-    // Compound assignment operators
-    GeoVec& operator+=(const GeoVec& other) {
-        x += other.x;
-        y += other.y;
-        z += other.z;
-        return *this;
-    }
-
-    GeoVec& operator-=(const GeoVec& other) {
-        x -= other.x;
-        y -= other.y;
-        z -= other.z;
-        return *this;
-    }
-
-    GeoVec& operator*=(float scalar) {
-        x *= scalar;
-        y *= scalar;
-        z *= scalar;
-        return *this;
-    }
-
-    GeoVec& operator/=(float scalar) {
-        x /= scalar;
-        y /= scalar;
-        z /= scalar;
-        return *this;
-    }
-
-    // Comparison operators
-    bool operator==(const GeoVec& other) const {
-        return x == other.x && y == other.y && z == other.z;
-    }
-
-    bool operator!=(const GeoVec& other) const {
-        return !(*this == other);
-    }
-
-    // Other methods
-    float length() const {
-        return std::sqrt(x * x + y * y + z * z);
-    }
-
-	GeoVec normalize() const {
-		return *this / length();
-	}
+        double length_squared() const
+        {
+            return x*x + y*y + z*z;
+        }
 };
 
-// dot product
-float dot(const GeoVec& v1, const GeoVec& v2) {
-	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+inline GeoVec operator+ (const GeoVec& v1, const GeoVec& v2)
+{
+    return GeoVec(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
 }
 
-// cross product
-GeoVec cross(const GeoVec& v1, const GeoVec& v2) {
-	return GeoVec(
-		v1.y * v2.z - v1.z * v2.y,
-		-(v1.x * v2.z - v1.z * v2.x),
-		v1.x * v2.y - v1.y * v2.x
-	);
+inline GeoVec operator+ (const GeoVec& v, const double& scalar)
+{
+    return GeoVec(v.x + scalar, v.y + scalar, v.z + scalar);
 }
 
-GeoVec operator*(float scalar, const GeoVec& v) {
-	return GeoVec(v.x * scalar, v.y * scalar, v.z * scalar);
+inline GeoVec operator- (const GeoVec& v)
+{
+    return GeoVec(-v.x, -v.y, -v.z);
+}
+inline GeoVec operator- (const GeoVec& v1, const GeoVec& v2)
+{
+    return GeoVec(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+}
+
+inline GeoVec operator* (const GeoVec& v1, const GeoVec& v2)
+{
+    return GeoVec(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
+}
+
+inline GeoVec operator* (const GeoVec& v1, const double& scalar)
+{
+    return GeoVec(v1.x * scalar, v1.y * scalar, v1.z * scalar);
+}
+
+inline GeoVec operator* (const double& scalar, const GeoVec& v1)
+{
+    return GeoVec(v1.x * scalar, v1.y * scalar, v1.z * scalar);
+}
+
+inline GeoVec operator/ (const GeoVec& v1, const double& scalar)
+{
+    return GeoVec(v1.x / scalar, v1.y / scalar, v1.z / scalar);
+}
+
+inline double dot(const GeoVec& v1, const GeoVec& v2)
+{
+    return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+}
+
+inline GeoVec cross(const GeoVec& v1, const GeoVec& v2)
+{
+    return GeoVec(v1.y * v2.z - v1.z * v2.y,
+                  v1.z * v2.x - v1.x * v2.z,
+                  v1.x * v2.y - v1.y * v2.x);
+}
+
+inline GeoVec normalize(const GeoVec& v)
+{
+    return v / v.length();
 }

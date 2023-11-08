@@ -9,7 +9,7 @@ double pi = 3.14159265358979323846;
 GeoVec compute_binary_colour(Ray& ray, World& world)
 {
 	HitRecord hit_record;
-	if (world.hit(ray, 0, std::numeric_limits<double>::infinity(), hit_record))
+	if (world.hit(ray, Interval(0.0, INFINITY), hit_record))
 	{
 		return GeoVec(1, 0, 0);
 	}
@@ -18,7 +18,7 @@ GeoVec compute_binary_colour(Ray& ray, World& world)
 
 Camera::Camera() 
 {
-	width = 800;
+	width = 720;
 	aspect_ratio = 16.0 / 9.0;
 	height = static_cast<int>(width / aspect_ratio);
 
@@ -36,11 +36,11 @@ void Camera::refresh()
     viewport_height = 2.0 * tan(fov_radians / 2) * focal_length;
     viewport_width = viewport_height * (static_cast<double>(width)/height);
 
-	w = (camera_pos - look_at_vec).normalize();
-	u = (cross(up_vector, w)).normalize();
+	w = normalize(camera_pos - look_at_vec);
+	u = normalize(cross(up_vector, w));
 	v = cross(w, u);
 
-    viewport_u = viewport_width * u;
+    viewport_u = viewport_width * -u;
     viewport_v = viewport_height * -v;
     horizontal_pixel_change = viewport_u / width;
     vertical_pixel_change = viewport_v / height;
@@ -70,10 +70,12 @@ void Camera::render(World& scene_hittables, RenderMode render_mode)
 GeoVec Camera::computeColour(Ray& ray, World& world)
 {
 	HitRecord hit_record;
-	if (world.hit(ray, 0, std::numeric_limits<double>::infinity(), hit_record))
+	if (world.hit(ray, Interval(0, INFINITY), hit_record))
 	{
 		GeoVec normal = hit_record.normal;
-		return 0.5 * (normal + 1);
+		return 0.5 * (normal + 1.0);
 	}
 	return world.backgroundColour;
 }
+
+// write a function to perform billphong rendering

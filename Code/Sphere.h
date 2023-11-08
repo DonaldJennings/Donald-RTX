@@ -1,44 +1,45 @@
 #pragma once
 #include "Hittable.h"
 #include "GeoVec.h"
+#include "Ray.h"
+#include "Interval.h"
 #include <cmath>
 
 class Sphere : public Hittable {
 public:
     Sphere() {}
-    Sphere(GeoVec center, double radius) : center(center), radius(radius) {}
+    Sphere(GeoVec center, double radius)
+        : center(center), radius(radius) {}
 
-    // implement hit function
-    bool hit(Ray& ray, double t_min, double t_max, HitRecord& hitRecord) const override
+    bool hit(Ray &r, Interval ray_interval, HitRecord& rec) const override
     {
-        GeoVec oc = ray.origin - center;
-        auto a = dot(ray.direction, ray.direction);
-        auto b = 2.0 * dot(oc, ray.direction);
-        auto c = dot(oc, oc) - radius * radius;
-        auto discriminant = b * b - 4 * a * c;
+        GeoVec oc = r.origin - center;
+        auto a = r.direction.length_squared();
+        auto b = dot(oc, r.direction);
+        auto c = oc.length_squared() - radius*radius;
 
-        if (discriminant > 0)
+        auto discriminant = b*b - a*c;
+        if (discriminant < 0) return false;
+
+        auto root_nature = sqrt(discriminant);
+        auto root = (-b - root_nature) / a;
+        if (!ray_interval.surrounds(root))
         {
-            auto temp = (-b - sqrt(discriminant)) / (2.0 * a);
-            if (temp < t_max && temp > t_min)
+            root = (-b + root_nature) / a;
+            if (!ray_interval.surrounds(root))
             {
-                hitRecord.t = temp;
-                hitRecord.point = ray.at(hitRecord.t);
-                hitRecord.normal = (hitRecord.point - center) / radius;
-                return true;
-            }
-            temp = (-b + sqrt(discriminant)) / (2.0 * a);
-            if (temp < t_max && temp > t_min)
-            {
-                hitRecord.t = temp;
-                hitRecord.point = ray.at(hitRecord.t);
-                hitRecord.normal = (hitRecord.point - center) / radius;
-                return true;
+                return false;
             }
         }
-        return false;
-    }
 
+        // Update the HitRecord information
+        rec.t = root;
+        rec.point = r.at(rec.t);
+        GeoVec outward_normal = (rec.point - center) / radius;
+        rec.set_face_normal(r, outward_normal);
+
+        return true;
+    }
 public:
     GeoVec center;
     double radius;
