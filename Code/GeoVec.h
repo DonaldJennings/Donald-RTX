@@ -1,4 +1,5 @@
 #pragma once
+#include "utils.h"
 #include <cmath>
 
 class GeoVec
@@ -90,4 +91,45 @@ inline GeoVec cross(const GeoVec& v1, const GeoVec& v2)
 inline GeoVec normalize(const GeoVec& v)
 {
     return v / v.length();
+}
+
+// Write a function that generates a random vector
+inline GeoVec random(double min=0, double max=1)
+{
+    return GeoVec(rand_double(min, max), rand_double(min, max), rand_double(min, max));
+}
+
+// write a function that generates a random vector in a unit sphere
+inline GeoVec random_in_unit_sphere()
+{
+    while(true)
+    {
+        auto p = random(-1, 1);
+        if (p.length_squared() < 1.0)
+            return p;
+    }
+}
+
+// write a function that generates a random vector in the same hemisphere as normal
+inline GeoVec random_in_hemisphere(const GeoVec& normal)
+{
+    GeoVec in_unit_sphere = random_in_unit_sphere();
+    if(dot(in_unit_sphere, normal) > 0.0)
+        return in_unit_sphere;
+    else
+        return -in_unit_sphere;
+}
+
+
+// write a function that calculates reflection vector
+inline GeoVec reflect(const GeoVec& v, const GeoVec& n)
+{
+    return v - 2*dot(v,n)*n;
+}
+
+inline GeoVec refract(const GeoVec& uv, const GeoVec& n, double etai_over_etat) {
+    auto cos_theta = fmin(dot(-uv, n), 1.0);
+    GeoVec r_out_perp =  etai_over_etat * (uv + cos_theta*n);
+    GeoVec r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.length_squared())) * n;
+    return r_out_perp + r_out_parallel;
 }

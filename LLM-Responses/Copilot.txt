@@ -179,3 +179,51 @@ private:
 };
 #endif // TRIANGLE_H
 
+// Write a function that generates a random vector
+inline GeoVec random()
+{
+    return GeoVec(drand48(), drand48(), drand48());
+}   
+
+
+// write a function that generates a random vector in the same hemisphere as normal
+inline GeoVec random_in_hemisphere(const GeoVec& normal)
+{
+    GeoVec in_unit_sphere = random_in_unit_sphere();
+    if(dot(in_unit_sphere, normal) > 0.0)
+        return in_unit_sphere;
+    else
+        return -in_unit_sphere;
+}
+
+define Light class that has a position and intesity both stored as GeoVec with constructor
+
+#include "GeoVec.h"
+
+class Light {
+public:
+    GeoVec position;
+    GeoVec intensity;
+
+    Light(GeoVec pos, GeoVec inten) : position(pos), intensity(inten) {}
+};
+
+write a class to represent Binary rendering on ray intersection that inherits from RenderMode.h
+
+#include "RenderMode.h"
+
+class BinaryRender : public RenderMode {
+public:
+  BinaryRender() : RenderMode("Binary") {}
+
+  virtual Color shade(const Ray& ray, const Scene& scene) const override {
+    // Find the closest intersection point
+    HitRecord hitRecord;
+    if (!scene.hit(ray, hitRecord)) {
+      return Color(0, 0, 0); // Return black if no intersection
+    }
+
+    // Return white if there is an intersection
+    return Color(1, 1, 1);
+  }
+};

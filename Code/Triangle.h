@@ -4,10 +4,14 @@
 
 class Triangle : public Hittable {
 public:
-    Triangle() {}
     Triangle(const GeoVec& v0, const GeoVec& v1, const GeoVec& v2)
-        : m_v0(v0), m_v1(v1), m_v2(v2) {}
+        : m_v0(v0), m_v1(v1), m_v2(v2) {};
 
+    void set_material(std::shared_ptr<Material> m)
+    {
+        material = m;
+    }
+    
     bool hit(Ray& r, Interval ray_interval, HitRecord& rec) const override
     {
         GeoVec e1 = m_v1 - m_v0;
@@ -43,6 +47,7 @@ public:
         rec.t = t;
         rec.point = r.at(t);
         GeoVec outward_normal = normalize(cross(e1, e2));
+        rec.material = material;
         rec.set_face_normal(r, outward_normal);
 
         return true;
@@ -50,4 +55,5 @@ public:
 
 private:
     GeoVec m_v0, m_v1, m_v2;
+    std::shared_ptr<Material> material;
 };
