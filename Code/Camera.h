@@ -4,6 +4,7 @@
 #include "PPMWriter.h"
 #include "RenderMode.h"
 #include "GeoVec.h"
+#include "utils.h"
 #include "Interval.h"
 
 class Camera
@@ -43,5 +44,8 @@ class Camera
 
 		GeoVec computeColour(Ray& ray, World& scene_hittables);
 		void refresh();
+
+		Ray get_ray(int i, int j);
+		GeoVec pixel_sample_square();
 
 };
