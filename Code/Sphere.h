@@ -40,7 +40,7 @@ public:
         rec.t = root;
         rec.point = r.at(rec.t);
         GeoVec outward_normal = (rec.point - center) / radius;
-        rec.material = this->material;
+        rec.material = material;
         rec.set_face_normal(r, outward_normal);
 
         return true;

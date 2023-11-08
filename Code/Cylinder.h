@@ -95,7 +95,7 @@ public:
         // set the hit record
         rec.t = root1;
         rec.point = hit_point;
-        rec.material = this->material;
+        rec.material = material;
         rec.normal = outward_normal;
 
         return true;
