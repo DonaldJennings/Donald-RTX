@@ -12,7 +12,7 @@ public:
         : center(center), radius(radius) {}
 
     void set_material(Material mat) { this->mat = mat; }
-    
+
     bool hit(Ray &r, Interval ray_interval, HitRecord& rec) const override
     {
         GeoVec oc = r.origin - center;
@@ -39,7 +39,7 @@ public:
         rec.point = r.at(rec.t);
         GeoVec outward_normal = (rec.point - center) / radius;
         rec.set_face_normal(r, outward_normal);
-        rec.material_ptr = std::make_shared<Material>(mat);
+        rec.material = mat;
         return true;
     }
 public:

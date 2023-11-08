@@ -8,7 +8,7 @@ public:
         : m_v0(v0), m_v1(v1), m_v2(v2){}
 
     void set_material(Material mat) { this->mat = mat; }
-    
+
     bool hit(Ray& r, Interval ray_interval, HitRecord& rec) const override
     {
         GeoVec e1 = m_v1 - m_v0;
@@ -45,7 +45,7 @@ public:
         rec.point = r.at(t);
         GeoVec outward_normal = normalize(cross(e1, e2));
         rec.set_face_normal(r, outward_normal);
-        rec.material_ptr = std::make_shared<Material>(mat);
+        rec.material = mat;
 
         return true;
     }

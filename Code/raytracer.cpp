@@ -7,6 +7,7 @@
 #include "Cylinder.h"
 #include "GeoVec.h"
 #include "BinaryRender.h"
+#include "BlinnPhong.h"
 #include "Triangle.h"
 #include "Material.h"
 #include <iostream>
@@ -102,7 +103,7 @@ int main()
 	
 	// Set up Render Mode
 	BinaryRender binary_render;
-
+	BlinnPhong blinn_phong;
 	// render scene
-	camera.render(world, binary_render);
+	camera.render(world, blinn_phong);
 }
