@@ -10,7 +10,7 @@ class Camera
 {
 	public:
 		Camera();
-		void render(World& scene_hittables, RenderMode render_mode);
+		void render(World& scene_hittables, RenderMode& render_mode);
 		void set_width(int width) { this->width = width; };
 		void set_height(int height) { this->height = height; };
 		void go_to(GeoVec camera_pos) { this->camera_pos = camera_pos; };
@@ -41,7 +41,6 @@ class Camera
 		double viewport_height;
 		double viewport_width;
 
-		GeoVec computeColour(Ray& ray, World& scene_hittables);
 		void refresh();
 
 };

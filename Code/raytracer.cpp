@@ -1,10 +1,9 @@
 #include "Camera.h"
-#include "SceneParser.h"
 #include "World.h"
 #include "Sphere.h"
 #include "nlohmann/json.hpp"
 #include "Ray.h"
-#include "RenderMode.h"
+#include "BinaryRender.h"
 #include "Cylinder.h"
 #include "GeoVec.h"
 #include "Triangle.h"
@@ -13,12 +12,26 @@
 
 using json = nlohmann::json;
 
+json parseScene(const char* filename)
+{
+	// open file
+	std::ifstream scene_file(filename);
+	if (!scene_file.is_open())
+	{
+		std::cerr << "Error: Could not open scene file" << std::endl;
+		return json();
+	}
+
+	// parse scene
+	json scene;
+	scene_file >> scene;
+	return scene;
+}
+
 int main()
 {
-	Camera camera;
-	SceneParser scene_parser;
-	
-	json parsed_scene = scene_parser.parseScene("../Scenes/scene.json");
+	Camera camera;	
+	json parsed_scene = parseScene("../Scenes/scene.json");
 
 	World world;
 	for (auto& shape : parsed_scene["scene"]["shapes"])
@@ -60,5 +73,7 @@ int main()
 	camera.look_at(GeoVec(parsed_scene["camera"]["lookAt"][0], parsed_scene["camera"]["lookAt"][1], parsed_scene["camera"]["lookAt"][2]));
 	camera.set_up(GeoVec(parsed_scene["camera"]["upVector"][0], parsed_scene["camera"]["upVector"][1], parsed_scene["camera"]["upVector"][2]));
 	// render scene
-	camera.render(world, RenderMode::BLINN_PHONG);
+
+	BinaryRender binary_render;
+	camera.render(world, binary_render);
 }

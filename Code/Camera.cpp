@@ -49,7 +49,7 @@ void Camera::refresh()
 }
 
 
-void Camera::render(World& scene_hittables, RenderMode render_mode)
+void Camera::render(World& scene_hittables, RenderMode& render_mode)
 {
 	refresh();
 	PPMWriter::writeHeader(std::cout, width, height);
@@ -61,21 +61,9 @@ void Camera::render(World& scene_hittables, RenderMode render_mode)
 			auto pixel_centre = pixel_origin + (i * horizontal_pixel_change) + (j * vertical_pixel_change);
 			auto direction = pixel_centre - camera_pos;
 			Ray ray(camera_pos, direction);
-			GeoVec colour = render_mode == RenderMode::BINARY ? compute_binary_colour(ray, scene_hittables) : computeColour(ray, scene_hittables);
+			GeoVec colour = render_mode.compute_colour(ray, scene_hittables, 10);
 			PPMWriter::writePixel(std::cout, colour);
 		}
 	}
 }
-
-GeoVec Camera::computeColour(Ray& ray, World& world)
-{
-	HitRecord hit_record;
-	if (world.hit(ray, Interval(0, INFINITY), hit_record))
-	{
-		GeoVec normal = hit_record.normal;
-		return 0.5 * (normal + 1.0);
-	}
-	return world.backgroundColour;
-}
-
 // write a function to perform billphong rendering
