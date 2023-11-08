@@ -19,10 +19,6 @@ void PPMWriter::writePixel(std::ostream& out, GeoVec colour)
     g *= scale;
     b *= scale;
 
-    r = sqrt(r);
-    g = sqrt(g);
-    b = sqrt(b);
-    
     // Write the translated [0,255] value of each color component.
     static const Interval intensity(0.000, 0.999);
     out << static_cast<int>(256 * intensity.clamp(r)) << ' '

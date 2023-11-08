@@ -7,15 +7,10 @@
 
 class Cylinder : public Hittable {
 public:
+    Cylinder() {}
     Cylinder(GeoVec center, GeoVec axis, double radius, double height)
         : center(center), axis(axis), radius(radius), height(2.0*height) { this->center.y -= height;}
 
-
-    void set_material(std::shared_ptr<Material> m)
-    {
-        material = m;
-    }
-    
     // define the hit function
     bool hit(Ray& r, Interval ray_interval, HitRecord& rec) const override
     {
@@ -95,7 +90,6 @@ public:
         // set the hit record
         rec.t = root1;
         rec.point = hit_point;
-        rec.material = material;
         rec.normal = outward_normal;
 
         return true;
@@ -106,5 +100,4 @@ public:
     GeoVec axis;
     double radius;
     double height;
-    std::shared_ptr<Material> material;
 };

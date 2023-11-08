@@ -27,7 +27,6 @@ Camera::Camera()
 	up_vector = GeoVec(0.0, 1.0, 0.0);
 
 	fov = 90;
-	max_bounce_depth = 10;
 }
 
 void Camera::refresh()
@@ -50,47 +49,39 @@ void Camera::refresh()
 }
 
 
-void Camera::render(World& scene_hittables, RenderMode& render_mode)
+void Camera::render(World& scene_hittables, RenderMode render_mode)
 {
 	refresh();
 	PPMWriter::writeHeader(std::cout, width, height);
 	for (int j = 0; j < height; ++j)
-	{
+{
 		std::clog << "\rScanlines Remaining: " << (height- j) << " " << std::flush;
 		for (int i = 0; i < width; ++i)
 		{
             GeoVec pixel_color(0,0,0);
-            for (int sample = 0; sample < 10; ++sample) {
+            for (int sample = 0; sample < 5; ++sample) {
                 Ray r = get_ray(i, j);
-                pixel_color = pixel_color + render_mode.compute_colour(r, max_bounce_depth, scene_hittables);
+                pixel_color = pixel_color + computeColour(r, scene_hittables);
             }
             PPMWriter::writePixel(std::cout, pixel_color);
+			// auto pixel_centre = pixel_origin + (i * horizontal_pixel_change) + (j * vertical_pixel_change);
+			// auto direction = pixel_centre - camera_pos;
+			// Ray ray(camera_pos, direction);
+			// GeoVec colour = render_mode == RenderMode::BINARY ? compute_binary_colour(ray, scene_hittables) : computeColour(ray, scene_hittables);
+			// PPMWriter::writePixel(std::cout, colour);
 		}
 	}
-	std::clog << "\nDone.\n";
 }
 
-GeoVec Camera::computeColour(Ray& ray, int bounce_depth, World& world)
+GeoVec Camera::computeColour(Ray& ray, World& world)
 {
 	HitRecord hit_record;
-
-	if (bounce_depth <= 0)
+	if (world.hit(ray, Interval(0, INFINITY), hit_record))
 	{
-		return GeoVec(0, 0, 0);
+		GeoVec normal = hit_record.normal;
+		return 0.5 * (normal + 1.0);
 	}
-
-	if (world.hit(ray, Interval(0.001, INFINITY), hit_record))
-	{
-
-		// return surface normal
-
-		return 0.5 * (hit_record.normal + GeoVec(1, 1, 1));
-
-	} 
-	
-    GeoVec unit_direction = normalize(ray.direction);
-    auto a = 0.1*(unit_direction.y + 1.0);
-    return (1.0-a)*GeoVec(1.0, 1.0, 1.0) + a*GeoVec(0.5, 0.7, 1.0);
+	return world.backgroundColour;
 }
 
 Ray Camera::get_ray(int i, int j) {
