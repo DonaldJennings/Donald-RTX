@@ -20,7 +20,8 @@ class Camera
 		void set_up(GeoVec up_vector) { this->up_vector = up_vector; };
 	
 	private:
-		// Camera Settigns
+
+		// Camera Settings
 		GeoVec camera_pos;
 		GeoVec look_at_vec;
 		GeoVec up_vector;
@@ -30,6 +31,7 @@ class Camera
 		double focal_length;
 
 		GeoVec u,v,w;
+
 		// Viewport
 		GeoVec pixel_origin;
 		GeoVec viewport_u;
@@ -43,14 +45,7 @@ class Camera
 		double viewport_width;
 
 		// Rendering
-		int max_bounce_depth=10;
+		int max_bounce_depth=5;
 		GeoVec computeColour(Ray& ray, int bounce_depth, World& scene_hittables);
-
-		GeoVec compute_blinn_phong_colour(Ray& ray, int bounce_depth, World& world);
-		GeoVec compute_binary_colour(Ray& ray, int bounce_depth, World& world);
 		void refresh();
-
-		Ray get_ray(int i, int j);
-		GeoVec pixel_sample_square();
-
 };

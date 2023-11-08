@@ -47,7 +47,7 @@ public:
         rec.t = t;
         rec.point = r.at(t);
         GeoVec outward_normal = normalize(cross(e1, e2));
-        rec.material = material;
+        rec.material = this->material;
         rec.set_face_normal(r, outward_normal);
 
         return true;
