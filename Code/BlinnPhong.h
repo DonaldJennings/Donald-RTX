@@ -13,7 +13,7 @@ public:
         GeoVec light_intensity(0.5, 0.5, 0.5);
 
         // Initialize color as black
-        GeoVec color(0.0, 0.0, 0.0);
+        GeoVec color(0.25, 0.25, 0.25);
 
         // If depth is 0, return black color
         if (depth == 0)
@@ -34,7 +34,18 @@ public:
             GeoVec diffuse_color = diffuse(L, N, hitRecord.material.diffuseColor, 0.5);
             GeoVec specular_color = specular(L, N, V, hitRecord.material.specularColor, 0.5, 0.5);
 
-            color = GeoVec(0.2, 0.2, 0.2) + diffuse_color + specular_color;
+            // if the object is reflective, compute the reflected ray and recursively compute the color
+            if (hitRecord.material.isReflective)
+            {
+                GeoVec reflected = reflect(ray.direction, N);
+                Ray reflected_ray(hitRecord.point, reflected);
+                GeoVec reflected_color = compute_colour(reflected_ray, world, depth - 1);
+                color = diffuse_color + specular_color + reflected_color;
+            }
+            else
+            {
+                color = diffuse_color + specular_color;
+            }
         }
 
         return color;
@@ -53,4 +64,6 @@ GeoVec specular(const GeoVec& light_dir, const GeoVec& normal, const GeoVec& vie
     float specular_factor = std::pow(std::max(0.0, dot(normal, halfway_dir)), shininess);
     return color * specular_factor * intensity;
 }
+
+
 };

@@ -91,3 +91,8 @@ inline GeoVec normalize(const GeoVec& v)
 {
     return v / v.length();
 }
+
+inline GeoVec reflect(const GeoVec& v, const GeoVec& n)
+{
+    return v - 2 * dot(v, n) * n;
+}
