@@ -44,6 +44,7 @@ class Camera
 		double viewport_height;
 		double viewport_width;
 
-		void refresh();
+		Ray ray_from_pixel(int i, int j);
+		void refresh_viewport_settings();
 
 };

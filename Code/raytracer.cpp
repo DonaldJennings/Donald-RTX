@@ -30,70 +30,9 @@ json parseScene(const char* filename)
 	return scene;
 }
 
-int main()
+
+void add_world_lights(World& world, json& parsed_scene)
 {
-	Camera camera;
-	
-	json parsed_scene = parseScene("../Scenes/simple_phong.json");
-
-	World world;
-	
-	// Add shapes to the world
-	for (auto& shape : parsed_scene["scene"]["shapes"])
-	{
-		auto material = shape["material"];
-		double ks = material["ks"].get<double>();
-		double kd = material["kd"].get<double>();
-		int specularexponent = material["specularexponent"].get<int>();
-		GeoVec diffusecolor = GeoVec(material["diffusecolor"][0], material["diffusecolor"][1], material["diffusecolor"][2]);
-		GeoVec specularcolor = GeoVec(material["specularcolor"][0], material["specularcolor"][1], material["specularcolor"][2]);
-		bool isreflective = material["isreflective"].get<bool>();
-		bool isrefractive = material["isrefractive"].get<bool>();
-		double reflectivity = material["reflectivity"].get<double>();
-		double refractiveindex = material["refractiveindex"].get<double>();
-
-		Material material_obj(ks, kd, specularexponent, diffusecolor, specularcolor, isreflective, reflectivity, isrefractive, refractiveindex);
-		
-		if (shape["type"] == "sphere")
-		{
-			auto center = GeoVec(shape["center"][0], shape["center"][1], shape["center"][2]);
-			double radius = shape["radius"].get<double>();
-
-			Sphere sphere(center, radius);
-			sphere.set_material(material_obj);
-
-			world.add(std::make_shared<Sphere>(sphere));
-		}
-		else if (shape["type"] == "cylinder")
-		{
-			auto center { GeoVec(shape["center"][0], shape["center"][1], shape["center"][2]) };
-			auto axis { GeoVec(shape["axis"][0], shape["axis"][1], shape["axis"][2]) };
-			double radius { shape["radius"].get<double>() };
-			double height { shape["height"].get<double>() };
-
-			Cylinder cylinder(center, axis, radius, height);
-			cylinder.set_material(material_obj);
-
-			world.add(std::make_shared<Cylinder>(cylinder));
-		}
-		else if (shape["type"] == "triangle")
-		{
-			auto v0 { GeoVec(shape["v0"][0], shape["v0"][1], shape["v0"][2]) };
-			auto v1 { GeoVec(shape["v1"][0], shape["v1"][1], shape["v1"][2]) };
-			auto v2 { GeoVec(shape["v2"][0], shape["v2"][1], shape["v2"][2]) };
-
-			Triangle triangle(v0, v1, v2);
-			triangle.set_material(material_obj);
-			
-			world.add(std::make_shared<Triangle>(triangle));
-		}
-		else
-		{
-			std::cerr << "Shape type not recognised" << std::endl;
-		}
-	}
-
-	// Add lights to the world
 	for (auto& light : parsed_scene["scene"]["lightsources"])
 	{
 		auto position = GeoVec(light["position"][0], light["position"][1], light["position"][2]);
@@ -101,23 +40,132 @@ int main()
 
 		world.add_light(std::make_shared<Light>(position, intensity));
 	}
+	std::clog << "Lights setup complete" << std::endl;
+}
 
-	std::clog << "Number of lights: " << world.lights.size() << "\n";
+void add_hittable_sphere(World& world, json& parsed_sphere, Material material)
+{
+	auto center = GeoVec(parsed_sphere["center"][0], parsed_sphere["center"][1], parsed_sphere["center"][2]);
+	double radius = parsed_sphere["radius"].get<double>();
+
+	Sphere sphere(center, radius);
+	sphere.set_material(material);
+	world.add(std::make_shared<Sphere>(sphere));
+}
+
+void add_hittable_cylinder(World& world, json& parsed_cylinder, Material material)
+{
+	auto center { GeoVec(parsed_cylinder["center"][0], parsed_cylinder["center"][1], parsed_cylinder["center"][2]) };
+	auto axis { GeoVec(parsed_cylinder["axis"][0], parsed_cylinder["axis"][1], parsed_cylinder["axis"][2]) };
+	double radius { parsed_cylinder["radius"].get<double>() };
+	double height { parsed_cylinder["height"].get<double>() };
+
+	Cylinder cylinder(center, axis, radius, height);
+	cylinder.set_material(material);
+	world.add(std::make_shared<Cylinder>(cylinder));
+}
+
+void add_hittable_triangle(World& world, json& parsed_triangle, Material material)
+{
+	auto v0 { GeoVec(parsed_triangle["v0"][0], parsed_triangle["v0"][1], parsed_triangle["v0"][2]) };
+	auto v1 { GeoVec(parsed_triangle["v1"][0], parsed_triangle["v1"][1], parsed_triangle["v1"][2]) };
+	auto v2 { GeoVec(parsed_triangle["v2"][0], parsed_triangle["v2"][1], parsed_triangle["v2"][2]) };
+
+	Triangle triangle(v0, v1, v2);
+	triangle.set_material(material);
+	world.add(std::make_shared<Triangle>(triangle));
+}
+
+Material parse_material(json& mat_json)
+{	
+	double ks = mat_json["ks"].get<double>();
+	double kd = mat_json["kd"].get<double>();
+	int specularexponent = mat_json["specularexponent"].get<int>();
+	GeoVec diffusecolor = GeoVec(mat_json["diffusecolor"][0], mat_json["diffusecolor"][1], mat_json["diffusecolor"][2]);
+	GeoVec specularcolor = GeoVec(mat_json["specularcolor"][0], mat_json["specularcolor"][1], mat_json["specularcolor"][2]);
+	bool isreflective = mat_json["isreflective"].get<bool>();
+	bool isrefractive = mat_json["isrefractive"].get<bool>();
+	double reflectivity = mat_json["reflectivity"].get<double>();
+	double refractiveindex = mat_json["refractiveindex"].get<double>();
+
+	return Material(ks, kd, specularexponent, diffusecolor, specularcolor, isreflective, reflectivity, isrefractive, refractiveindex);
+}
+void setup_camera(Camera& camera, json& parsed_camera, int num_bounces)
+{
+	camera.setFOV(parsed_camera["fov"]);
+	camera.set_width(parsed_camera["width"]);
+	camera.set_height(parsed_camera["height"]);
+	camera.set_exposure(parsed_camera["exposure"]);
+
+	std::clog << "Setting number of bounces to " << num_bounces << std::endl;
+
+	camera.set_num_bounces(num_bounces);
+
+	std::clog << "Camera settings setup complete" << std::endl;
+	camera.go_to(GeoVec(parsed_camera["position"][0], parsed_camera["position"][1], parsed_camera["position"][2]));
+	camera.look_at(GeoVec(parsed_camera["lookAt"][0], parsed_camera["lookAt"][1], parsed_camera["lookAt"][2]));
+	camera.set_up(GeoVec(parsed_camera["upVector"][0], parsed_camera["upVector"][1], parsed_camera["upVector"][2]));
+	std::clog << "Camera setup complete" << std::endl;
+}
+
+
+
+
+
+int main()
+{
+	json parsed_scene = parseScene("../Scenes/binary_primitives.json");
+
+	Camera camera;
+	World world;
+	BinaryRender binary_render;
+	BlinnPhong blinn_phong;
+
+
+	for (auto& shape : parsed_scene["scene"]["shapes"])
+	{
+		Material material_obj;
+
+		if (parsed_scene["rendermode"] != "binary")
+		{
+			material_obj = parse_material(shape["material"]);
+		}
+		if (shape["type"] == "sphere")
+		{
+			add_hittable_sphere(world, shape, material_obj);
+			std::clog << "Sphere added" << std::endl;
+		}
+		else if (shape["type"] == "cylinder")
+		{
+			add_hittable_cylinder(world, shape, material_obj);
+			std::clog << "Cylinder added" << std::endl;
+		}
+		else if (shape["type"] == "triangle")
+		{
+			add_hittable_triangle(world, shape, material_obj);
+			std::clog << "Triangle added" << std::endl;
+		}
+		else
+		{
+			std::cerr << "Shape type not recognised" << std::endl;
+		}
+	}
+	std::clog << "Shapes setup complete" << std::endl;
+
+	if (parsed_scene["rendermode"] != "binary")
+	{
+		add_world_lights(world, parsed_scene);
+	}
 
 	world.backgroundColour = GeoVec(parsed_scene["scene"]["backgroundcolor"][0], parsed_scene["scene"]["backgroundcolor"][1], parsed_scene["scene"]["backgroundcolor"][2]);
 
-	camera.setFOV(parsed_scene["camera"]["fov"]);
-	camera.set_width(parsed_scene["camera"]["width"]);
-	camera.set_height(parsed_scene["camera"]["height"]);
-	camera.set_exposure(parsed_scene["camera"]["exposure"]);
-	camera.set_num_bounces(parsed_scene["nbounces"]);
-	camera.go_to(GeoVec(parsed_scene["camera"]["position"][0], parsed_scene["camera"]["position"][1], parsed_scene["camera"]["position"][2]));
-	camera.look_at(GeoVec(parsed_scene["camera"]["lookAt"][0], parsed_scene["camera"]["lookAt"][1], parsed_scene["camera"]["lookAt"][2]));
-	camera.set_up(GeoVec(parsed_scene["camera"]["upVector"][0], parsed_scene["camera"]["upVector"][1], parsed_scene["camera"]["upVector"][2]));
-	
-	// Set up Render Mode
-	BinaryRender binary_render;
-	BlinnPhong blinn_phong;
-	// render scene
-	camera.render(world, blinn_phong);
+	int num_bounces = 1;
+	if (parsed_scene["rendermode"] != "binary")
+	{
+		num_bounces = parsed_scene["nbounces"].get<int>();
+		std::clog << "Number of bounces set to " << num_bounces << std::endl;
+	}
+
+	setup_camera(camera, parsed_scene["camera"], num_bounces);
+	camera.render(world, binary_render);
 }

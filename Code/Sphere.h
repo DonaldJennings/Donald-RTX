@@ -17,6 +17,24 @@ public:
     
     bool hit(Ray &r, Interval ray_interval, HitRecord& rec) const override
     {
+        double root = find_root(r, ray_interval);
+        if (!ray_interval.surrounds(root))
+        {
+            return false;
+        }
+
+        // Update the HitRecord information
+        rec.t = root;
+        rec.point = r.at(rec.t);
+        GeoVec outward_normal = (rec.point - center) / radius;
+        rec.material = material;
+        rec.set_face_normal(r, outward_normal);
+
+        return true;
+    }
+
+    double find_root(Ray& r, Interval ray_interval) const
+    {
         GeoVec oc = r.origin - center;
         auto a = r.direction.length_squared();
         auto b = dot(oc, r.direction);
@@ -30,21 +48,10 @@ public:
         if (!ray_interval.surrounds(root))
         {
             root = (-b + root_nature) / a;
-            if (!ray_interval.surrounds(root))
-            {
-                return false;
-            }
         }
-
-        // Update the HitRecord information
-        rec.t = root;
-        rec.point = r.at(rec.t);
-        GeoVec outward_normal = (rec.point - center) / radius;
-        rec.material = material;
-        rec.set_face_normal(r, outward_normal);
-
-        return true;
+        return root;
     }
+
 public:
     GeoVec center;
     double radius;

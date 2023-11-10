@@ -5,7 +5,7 @@ CXXFLAGS = -Wall -Wextra -pedantic -std=c++11
 
 # Define source and object file directories
 SRCDIR = .
-OBJDIR = obj
+OBJDIR = build
 
 # Define source and object files
 SRCS = $(wildcard $(SRCDIR)/*.cpp)

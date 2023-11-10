@@ -19,7 +19,7 @@ Camera::Camera()
 	fov = 90;
 }
 
-void Camera::refresh()
+void Camera::refresh_viewport_settings()
 {
 	double fov_radians = fov * (pi / 180);
 	focal_length = (camera_pos - look_at_vec).length();
@@ -39,35 +39,27 @@ void Camera::refresh()
 }
 
 
-void Camera::render(World& scene_hittables, RenderMode& render_mode)
+void Camera::render(World& world, RenderMode& render_mode)
 {
-	refresh();
+	refresh_viewport_settings();
 	PPMWriter::writeHeader(std::cout, width, height);
     for (int j = 0; j < height; ++j)
     {
+        std::clog << "\rScanlines remaining: " << (height - j) << ' ' << std::flush;
         for (int i = 0; i < width; ++i)
         {
-            // Calculate the ray for this pixel
-            GeoVec ray_origin = camera_pos;
-            GeoVec ray_direction = pixel_origin + i*horizontal_pixel_change + j*vertical_pixel_change - camera_pos;
-            Ray ray(ray_origin, ray_direction);
-
-            // Calculate the color of the pixel
-            GeoVec pixel_color = render_mode.compute_colour(ray, scene_hittables, num_bounces);
-
-            // Apply exposure
-            // pixel_color.x = 1.0 - exp(-exposure * pixel_color.x);
-            // pixel_color.y = 1.0 - exp(-exposure * pixel_color.y);
-            // pixel_color.z = 1.0 - exp(-exposure * pixel_color.z);
-
-            // Apply gamma correction
-            // pixel_color.x = sqrt(pixel_color.x);
-            // pixel_color.y = sqrt(pixel_color.y);
-            // pixel_color.z = sqrt(pixel_color.z);
-
-            // Write the pixel color to the output
+            Ray ray_to_pixel = ray_from_pixel(i, j);
+            GeoVec pixel_color = render_mode.compute_colour(ray_to_pixel, world, num_bounces);
             PPMWriter::writePixel(std::cout, pixel_color);
         }
 	}
+    std::clog << "\nDone.\n";
 }
-// write a function to perform billphong rendering
+
+
+Ray Camera::ray_from_pixel(int i, int j)
+{
+    GeoVec ray_origin = camera_pos;
+    GeoVec ray_direction = pixel_origin + i*horizontal_pixel_change + j*vertical_pixel_change - camera_pos;
+    return Ray(ray_origin, ray_direction);
+}
