@@ -221,3 +221,7 @@ public:
     bool isRefractive;      // Whether the material is refractive
     double refractiveIndex; // The refractive index of the material
 };
+
+
+
+write the hit function with the center being the midpoint of the sphere with detection for top cap and bottom cap. Cylinder should face the direction of axis

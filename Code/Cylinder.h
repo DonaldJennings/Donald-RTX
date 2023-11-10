@@ -4,6 +4,8 @@
 #include "Ray.h"
 #include "Interval.h"
 #include<cmath>
+#include<limits>
+
 
 
 class Cylinder : public Hittable {
@@ -55,7 +57,7 @@ public:
     bool check_cap_intersection(Ray& r, Interval ray_interval, HitRecord& rec, GeoVec cap_center, GeoVec cap_normal) const
     {
         double t = dot(cap_center - r.origin, cap_normal) / dot(r.direction, cap_normal);
-        if (t < ray_interval.start() || t > ray_interval.end())
+        if (t <= ray_interval.start() || t >= ray_interval.end())
         {
             return false;
         }
@@ -78,6 +80,14 @@ public:
     std::pair<double, double> compute_uv(const HitRecord& rec) const override
     {
         GeoVec p = rec.point - center;
+
+        // Check if the intersection point is on the top or bottom cap
+        if (std::abs(p.y - height) < std::numeric_limits<double>::epsilon() || std::abs(p.y + height) < std::numeric_limits<double>::epsilon()) {
+            double u = 0.5 + atan2(p.z, p.x) / (2 * M_PI);
+            double v = 0.5 - sqrt(p.x * p.x + p.z * p.z) / (2 * radius);
+            return std::make_pair(u, v);
+        }
+
         double theta = atan2(p.z, p.x);
         double u = (theta + M_PI) / (2 * M_PI);
         double v = 1.0 - p.y / height;
