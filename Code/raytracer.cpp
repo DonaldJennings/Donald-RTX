@@ -97,7 +97,7 @@ void setup_camera(Camera& camera, json& parsed_camera, int num_bounces)
 	camera.set_height(parsed_camera["height"]);
 	camera.set_exposure(parsed_camera["exposure"]);
 
-	std::clog << "Setting number of bounces to " << num_bounces << std::endl;
+	// std::clog << "Setting number of bounces to " << num_bounces << std::endl;
 
 	camera.set_num_bounces(num_bounces);
 
@@ -114,7 +114,7 @@ void setup_camera(Camera& camera, json& parsed_camera, int num_bounces)
 
 int main()
 {
-	json parsed_scene = parseScene("../Scenes/binary_primitives.json");
+	json parsed_scene = parseScene("../Scenes/scene.json");
 
 	Camera camera;
 	World world;
@@ -159,7 +159,7 @@ int main()
 
 	world.backgroundColour = GeoVec(parsed_scene["scene"]["backgroundcolor"][0], parsed_scene["scene"]["backgroundcolor"][1], parsed_scene["scene"]["backgroundcolor"][2]);
 
-	int num_bounces = 1;
+	int num_bounces = 8;
 	if (parsed_scene["rendermode"] != "binary")
 	{
 		num_bounces = parsed_scene["nbounces"].get<int>();
@@ -167,5 +167,5 @@ int main()
 	}
 
 	setup_camera(camera, parsed_scene["camera"], num_bounces);
-	camera.render(world, binary_render);
+	camera.render(world, blinn_phong);
 }

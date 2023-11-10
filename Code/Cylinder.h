@@ -22,19 +22,21 @@ public:
         }
 
         GeoVec cylinder_point = r.at(root);
-
-        if (cylinder_point.y < center.y - height || cylinder_point.y > center.y + height)
+        
+        GeoVec vector_to_point = cylinder_point - center;
+        double projection = dot(vector_to_point, axis);
+        if (projection < - height || projection > height)
         {
-            if (cylinder_point.y < center.y - height)
+            if (projection >= 0)
             {
-                GeoVec cap_center = center - height * axis;
-                GeoVec cap_normal = -axis;
+                GeoVec cap_center = center + height * axis;
+                GeoVec cap_normal = normalize(axis);
                 return check_cap_intersection(r, ray_interval, rec, cap_center, cap_normal);
             }
             else
             {
-                GeoVec cap_center = center + height * axis;
-                GeoVec cap_normal = axis;
+                GeoVec cap_center = center - height * axis;
+                GeoVec cap_normal = -normalize(axis);
                 return check_cap_intersection(r, ray_interval, rec, cap_center, cap_normal);
             }
         }
@@ -51,7 +53,7 @@ public:
     // << COPILOT GENERATED >>
     bool check_cap_intersection(Ray& r, Interval ray_interval, HitRecord& rec, GeoVec cap_center, GeoVec cap_normal) const
     {
-        double t = (cap_center.y - r.origin.y) / r.direction.y;
+        double t = dot(cap_center - r.origin, cap_normal) / dot(r.direction, cap_normal);
         if (t < ray_interval.start() || t > ray_interval.end())
         {
             return false;
