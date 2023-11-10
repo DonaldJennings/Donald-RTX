@@ -5,16 +5,6 @@
 #include<math.h>
 
 double pi = 3.14159265358979323846;
-// write function to compute binary colour if ray hits an object
-GeoVec compute_binary_colour(Ray& ray, World& world)
-{
-	HitRecord hit_record;
-	if (world.hit(ray, Interval(0.0, INFINITY), hit_record))
-	{
-		return GeoVec(1, 0, 0);
-	}
-	return world.backgroundColour;
-}
 
 Camera::Camera() 
 {
@@ -53,17 +43,31 @@ void Camera::render(World& scene_hittables, RenderMode& render_mode)
 {
 	refresh();
 	PPMWriter::writeHeader(std::cout, width, height);
-	for (int j = 0; j < height; ++j)
-	{
-		std::clog << "\rScanlines Remaining: " << (height- j) << " " << std::flush;
-		for (int i = 0; i < width; ++i)
-		{
-			auto pixel_centre = pixel_origin + (i * horizontal_pixel_change) + (j * vertical_pixel_change);
-			auto direction = pixel_centre - camera_pos;
-			Ray ray(camera_pos, direction);
-			GeoVec colour = render_mode.compute_colour(ray, scene_hittables, 10);
-			PPMWriter::writePixel(std::cout, colour);
-		}
+    for (int j = 0; j < height; ++j)
+    {
+        for (int i = 0; i < width; ++i)
+        {
+            // Calculate the ray for this pixel
+            GeoVec ray_origin = camera_pos;
+            GeoVec ray_direction = pixel_origin + i*horizontal_pixel_change + j*vertical_pixel_change - camera_pos;
+            Ray ray(ray_origin, ray_direction);
+
+            // Calculate the color of the pixel
+            GeoVec pixel_color = render_mode.compute_colour(ray, scene_hittables, num_bounces);
+
+            // Apply exposure
+            // pixel_color.x = 1.0 - exp(-exposure * pixel_color.x);
+            // pixel_color.y = 1.0 - exp(-exposure * pixel_color.y);
+            // pixel_color.z = 1.0 - exp(-exposure * pixel_color.z);
+
+            // Apply gamma correction
+            // pixel_color.x = sqrt(pixel_color.x);
+            // pixel_color.y = sqrt(pixel_color.y);
+            // pixel_color.z = sqrt(pixel_color.z);
+
+            // Write the pixel color to the output
+            PPMWriter::writePixel(std::cout, pixel_color);
+        }
 	}
 }
 // write a function to perform billphong rendering

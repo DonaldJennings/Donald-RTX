@@ -13,6 +13,8 @@ class Camera
 		void render(World& scene_hittables, RenderMode& render_mode);
 		void set_width(int width) { this->width = width; };
 		void set_height(int height) { this->height = height; };
+		void set_exposure(double exposure) { this->exposure = exposure; };
+		void set_num_bounces(int num_bounces) { this->num_bounces = num_bounces; };
 		void go_to(GeoVec camera_pos) { this->camera_pos = camera_pos; };
 		void setFOV(double fov) { this->fov = fov; };
 		void look_at(GeoVec look_at) { this->look_at_vec = look_at; };
@@ -27,6 +29,7 @@ class Camera
 		double fov;
 		double aspect_ratio;
 		double focal_length;
+		int num_bounces;
 
 		GeoVec u,v,w;
 		// Viewport

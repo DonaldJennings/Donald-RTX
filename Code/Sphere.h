@@ -7,12 +7,14 @@
 
 class Sphere : public Hittable {
 public:
-    Sphere() {}
     Sphere(GeoVec center, double radius)
-        : center(center), radius(radius) {}
+        : center(center), radius(radius) {};
 
-    void set_material(Material mat) { this->mat = mat; }
-
+    void set_material(Material m)
+    {
+        material = m;
+    }
+    
     bool hit(Ray &r, Interval ray_interval, HitRecord& rec) const override
     {
         GeoVec oc = r.origin - center;
@@ -38,12 +40,13 @@ public:
         rec.t = root;
         rec.point = r.at(rec.t);
         GeoVec outward_normal = (rec.point - center) / radius;
+        rec.material = material;
         rec.set_face_normal(r, outward_normal);
-        rec.material = mat;
+
         return true;
     }
 public:
     GeoVec center;
     double radius;
-    Material mat;
+    Material material;
 };

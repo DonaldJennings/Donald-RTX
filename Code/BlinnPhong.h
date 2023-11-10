@@ -1,6 +1,6 @@
 
 #include "RenderMode.h"
-
+#include <iostream>
 class BlinnPhong : public RenderMode {
 public:
     BlinnPhong() {}
@@ -8,47 +8,72 @@ public:
 
     GeoVec compute_colour(Ray& ray, World& world, int depth) const override
     {
-        // Light position
-        GeoVec light_pos(0.0, 1.0, 0.5);
-        GeoVec light_intensity(0.5, 0.5, 0.5);
-
         // Initialize color as black
-        GeoVec color(0.25, 0.25, 0.25);
-
-        // If depth is 0, return black color
-        if (depth == 0)
-            return color;
-
+        GeoVec diffuse_color = GeoVec(0, 0, 0);
+        GeoVec specular_color = GeoVec(0, 0, 0);
+        GeoVec reflected_color = GeoVec(0, 0, 0);
+        GeoVec refracted_color = GeoVec(0, 0, 0);
         // Initialize a hit record
         HitRecord hitRecord;
 
+        if (depth <= 0)
+        {
+            return world.backgroundColour;
+        }
         // Check if the ray hits any object in the world
         if (world.hit(ray, Interval(0.001, std::numeric_limits<double>::max()), hitRecord))
         {
-            // Compute the color at the intersection point using the Blinn-Phong shading model
             GeoVec N = hitRecord.normal; // Normal at the intersection point
-            GeoVec V = -ray.direction; // Direction to the viewer
-            GeoVec L = light_pos - hitRecord.point; // Direction to the light
-            L = normalize(L); // Normalize the direction to the light
+            GeoVec V = normalize(-ray.direction); // Direction to the viewer
+            for (auto light : world.lights)
+            {
+                GeoVec L = normalize(light->position() - hitRecord.point); // Direction to the light source
+                
+                Ray shadow_ray(hitRecord.point, L);
+                HitRecord shadow_hit_record;
+                if (!world.hit(shadow_ray, Interval(0.001, std::numeric_limits<double>::max()), shadow_hit_record))
+                {
+                    // Compute the color at the intersection point using the Blinn-Phong shading model
+                    diffuse_color += diffuse(L, N, hitRecord.material.diffuseColor, hitRecord.material.kd) * light->intensity();
+                    specular_color += specular(L, N, V, hitRecord.material.specularColor, hitRecord.material.ks, hitRecord.material.specularExponent) * light->intensity();
+                }
+            }
 
-            GeoVec diffuse_color = diffuse(L, N, hitRecord.material.diffuseColor, 0.5);
-            GeoVec specular_color = specular(L, N, V, hitRecord.material.specularColor, 0.5, 0.5);
+            // Add the ambient color
+            GeoVec ambient_color = hitRecord.material.diffuseColor * 0.075;
 
+            
             // if the object is reflective, compute the reflected ray and recursively compute the color
             if (hitRecord.material.isReflective)
             {
-                GeoVec reflected = reflect(ray.direction, N);
+                GeoVec reflected = reflect(ray.direction, hitRecord.normal);
                 Ray reflected_ray(hitRecord.point, reflected);
-                GeoVec reflected_color = compute_colour(reflected_ray, world, depth - 1);
-                color = diffuse_color + specular_color + reflected_color;
-            }
-            else
-            {
-                color = diffuse_color + specular_color;
-            }
-        }
+                GeoVec reflected_color_mat = compute_colour(reflected_ray, world, depth - 1);
+                reflected_color = reflected_color_mat;
 
-        return color;
+                // Adjust the diffuse and specular color to account for the reflection
+                diffuse_color = (1 - hitRecord.material.reflectivity) * diffuse_color;
+                specular_color = (1 - hitRecord.material.reflectivity) * specular_color;
+            }
+
+            // if the object is refractive, compute the refracted ray and recursively compute the color
+            if (hitRecord.material.isRefractive)
+            {
+                double refractive_index = hitRecord.material.refractiveIndex;
+                GeoVec refracted;
+                if (refract(ray.direction, hitRecord.normal, refractive_index, refracted))
+                {
+                    Ray refracted_ray(hitRecord.point, refracted);
+                    refracted_color = compute_colour(refracted_ray, world, depth - 1);
+                    refracted_color = 1.0 * refracted_color;
+                }
+            }
+
+            return ambient_color + diffuse_color + specular_color + reflected_color + refracted_color;
+        } else {
+            // If the ray doesn't hit any object, return the background color
+            return world.backgroundColour;
+        }
     }
 
 private:

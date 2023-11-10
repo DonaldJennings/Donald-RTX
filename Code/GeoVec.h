@@ -75,6 +75,11 @@ inline GeoVec operator/ (const GeoVec& v1, const double& scalar)
     return GeoVec(v1.x / scalar, v1.y / scalar, v1.z / scalar);
 }
 
+inline bool operator== (const GeoVec& v1, const GeoVec& v2)
+{
+    return (v1.x == v2.x && v1.y == v2.y && v1.z == v2.z);
+}
+
 inline double dot(const GeoVec& v1, const GeoVec& v2)
 {
     return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
@@ -87,6 +92,14 @@ inline GeoVec cross(const GeoVec& v1, const GeoVec& v2)
                   v1.x * v2.y - v1.y * v2.x);
 }
 
+inline GeoVec operator+= (GeoVec& v1, const GeoVec& v2)
+{
+    v1.x += v2.x;
+    v1.y += v2.y;
+    v1.z += v2.z;
+    return v1;
+}
+
 inline GeoVec normalize(const GeoVec& v)
 {
     return v / v.length();
@@ -95,4 +108,17 @@ inline GeoVec normalize(const GeoVec& v)
 inline GeoVec reflect(const GeoVec& v, const GeoVec& n)
 {
     return v - 2 * dot(v, n) * n;
+}
+
+inline bool refract(const GeoVec& v, const GeoVec& n, double ni_over_nt, GeoVec& refracted)
+{
+    GeoVec uv = normalize(v);
+    double dt = dot(uv, n);
+    double discriminant = 1.0 - ni_over_nt * ni_over_nt * (1 - dt * dt);
+    if (discriminant > 0)
+    {
+        refracted = ni_over_nt * (uv - n * dt) - n * sqrt(discriminant);
+        return true;
+    }
+    return false;
 }

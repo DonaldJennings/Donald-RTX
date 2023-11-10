@@ -7,6 +7,7 @@
 #include "Cylinder.h"
 #include "nlohmann/json.hpp"
 #include "Interval.h"
+#include "Light.h"
 
 using json = nlohmann::json;
 
@@ -15,8 +16,14 @@ public:
     GeoVec backgroundColour;
     std::vector<std::shared_ptr<Hittable>> hittables;
 
+    std::vector<std::shared_ptr<Light>> lights;
+
     void add(std::shared_ptr<Hittable> hittable) {
         hittables.push_back(hittable);
+    }
+
+    void add_light(std::shared_ptr<Light> light) {
+        lights.push_back(light);
     }
 
     void clear() {

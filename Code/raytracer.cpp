@@ -94,9 +94,24 @@ int main()
 		}
 	}
 
+	// Add lights to the world
+	for (auto& light : parsed_scene["scene"]["lightsources"])
+	{
+		auto position = GeoVec(light["position"][0], light["position"][1], light["position"][2]);
+		auto intensity = GeoVec(light["intensity"][0], light["intensity"][1], light["intensity"][2]);
+
+		world.add_light(std::make_shared<Light>(position, intensity));
+	}
+
+	std::clog << "Number of lights: " << world.lights.size() << "\n";
+
+	world.backgroundColour = GeoVec(parsed_scene["scene"]["backgroundcolor"][0], parsed_scene["scene"]["backgroundcolor"][1], parsed_scene["scene"]["backgroundcolor"][2]);
+
 	camera.setFOV(parsed_scene["camera"]["fov"]);
 	camera.set_width(parsed_scene["camera"]["width"]);
 	camera.set_height(parsed_scene["camera"]["height"]);
+	camera.set_exposure(parsed_scene["camera"]["exposure"]);
+	camera.set_num_bounces(parsed_scene["nbounces"]);
 	camera.go_to(GeoVec(parsed_scene["camera"]["position"][0], parsed_scene["camera"]["position"][1], parsed_scene["camera"]["position"][2]));
 	camera.look_at(GeoVec(parsed_scene["camera"]["lookAt"][0], parsed_scene["camera"]["lookAt"][1], parsed_scene["camera"]["lookAt"][2]));
 	camera.set_up(GeoVec(parsed_scene["camera"]["upVector"][0], parsed_scene["camera"]["upVector"][1], parsed_scene["camera"]["upVector"][2]));

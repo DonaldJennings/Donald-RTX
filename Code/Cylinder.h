@@ -5,98 +5,75 @@
 #include "Interval.h"
 #include<cmath>
 
+
 class Cylinder : public Hittable {
 public:
     Cylinder() {}
     Cylinder(GeoVec center, GeoVec axis, double radius, double height)
-        : center(center), axis(axis), radius(radius), height(2.0*height) { this->center.y -= height;}
+        : center(center), axis(axis), radius(radius), height(height) {}
 
     void set_material(Material mat) { this->mat = mat; }
 
-    // define the hit function
-    bool hit(Ray& r, Interval ray_interval, HitRecord& rec) const override
-    {
-        // calculate t values for the top and bottom caps
-        double t_bottom = (center.y - r.origin.y) / r.direction.y;
-        double t_top = ((center.y + height) - r.origin.y) / r.direction.y;
-        
-        // calculate intersection points
-        GeoVec p_bottom = r.at(t_bottom);
-        GeoVec p_top = r.at(t_top);
-        
-        // check if the ray's origin is outside the cylinder
-        if (r.origin.y < center.y || r.origin.y > center.y + height)
+    bool hit(Ray& r, Interval ray_interval, HitRecord& rec) const override {
+        GeoVec oc = r.origin - center;
+        double a = dot(r.direction, r.direction) - pow(dot(r.direction, axis), 2);
+        double half_b = dot(oc, r.direction) - dot(oc, axis) * dot(r.direction, axis);
+        double c = dot(oc, oc) - pow(dot(oc, axis), 2) - radius * radius;
+        double discriminant = half_b * half_b - a * c;
+
+        if (discriminant < 0) return false;
+        double sqrtd = sqrt(discriminant);
+
+        // Find the nearest root that lies in the acceptable range.
+        double root = (-half_b - sqrtd) / a;
+        if (root < ray_interval.start() || ray_interval.end() < root) {
+            root = (-half_b + sqrtd) / a;
+            if (root < ray_interval.start() || ray_interval.end() < root)
+                return false;
+        }
+
+        GeoVec p = r.at(root);
+        if (p.y < center.y - height || p.y > center.y + height) 
         {
-            if (dot(p_bottom - center, p_bottom - center) <= radius * radius)
-            {
-                // check if the cap is visible
-                if (dot(r.direction, -axis) < 0)
-                {
-                    rec.t = t_bottom;
-                    rec.point = p_bottom;
-                    rec.normal = -axis;
-                    return true;
-                }
+            // Check for intersection with top cap
+            double t_top = (center.y + height - r.origin.y) / r.direction.y;
+            if (t_top < ray_interval.start() || t_top > ray_interval.end()) {
+                return false;
+            }
+            GeoVec p_top = r.at(t_top);
+            if (dot(p_top - (center + axis * height), p_top - (center + axis * height)) <= radius * radius) {
+                rec.t = t_top;
+                rec.point = p_top;
+                rec.set_face_normal(r, axis);
+                rec.material = mat;
+                return true;
             }
 
-            // check top cap
-            if (dot(p_top - (center + (axis * height)), p_top - (center + (axis * height))) <= radius * radius)
-            {
-                // check if the cap is visible
-                if (dot(r.direction, axis) < 0)
-                {
-                    rec.t = t_top;
-                    rec.point = p_top;
-                    rec.normal = axis;
-                    return true;
-                }
+            // Check for intersection with bottom cap
+            double t_bottom = (center.y - height - r.origin.y) / r.direction.y;
+            if (t_bottom < ray_interval.start() || t_bottom > ray_interval.end()) {
+                return false;
             }
-        }
-        
-        
-        // define the quadratic equation
-        auto a = pow(r.direction.x, 2) + pow(r.direction.z, 2);
-        auto b = 2 * (r.direction.x * (r.origin.x - center.x) + r.direction.z * (r.origin.z - center.z));
-        auto c = pow(r.origin.x - center.x, 2) + pow(r.origin.z - center.z, 2) - pow(radius, 2);
+            GeoVec p_bottom = r.at(t_bottom);
+            if (dot(p_bottom - (center - axis * height), p_bottom - (center - axis * height)) <= radius * radius) {
+                rec.t = t_bottom;
+                rec.point = p_bottom;
+                rec.set_face_normal(r, -axis);
+                rec.material = mat;
+                return true;
+            }
 
-        // calculate the discriminant
-        auto discriminant = pow(b, 2) - 4 * a * c;
-
-        // if the discriminant is less than 0, there are no real roots
-        if (discriminant < 0)
-        {
             return false;
         }
 
-        // calculate the roots
-        auto root1 = (-b - sqrt(discriminant)) / (2 * a);
-        auto root2 = (-b + sqrt(discriminant)) / (2 * a);
-
-        // if the roots are less than t_min or greater than t_max, return false
-        if (!ray_interval.surrounds(root1) && !ray_interval.surrounds(root2))
-        {
-            return false;
-        }
-        // calculate the hit point
-        auto hit_point = r.origin + root1 * r.direction;
-
-        // if the hit point is not on the cylinder, return false
-        if (hit_point.y < center.y || hit_point.y > center.y + height)
-        {
-            return false;
-        }
-
-        // calculate the normal
-        auto outward_normal = normalize(hit_point - center);
-
-        // set the hit record
-        rec.t = root1;
-        rec.point = hit_point;
-        rec.normal = outward_normal;
+        rec.t = root;
+        rec.point = p;
+        GeoVec outward_normal = normalize((p - center) - dot(p - center, axis) * axis);
+        rec.set_face_normal(r, outward_normal);
         rec.material = mat;
+
         return true;
     }
-
 public:
     GeoVec center;
     GeoVec axis;
