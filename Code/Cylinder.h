@@ -45,6 +45,7 @@ public:
         rec.point = cylinder_point;
         GeoVec outward_normal = normalize((cylinder_point - center) - dot(cylinder_point - center, axis) * axis);
         rec.set_face_normal(r, outward_normal);
+        rec.shape = std::make_shared<Cylinder>(*this);
         rec.material = mat;
 
         return true;
@@ -58,21 +59,32 @@ public:
         {
             return false;
         }
-        
+
         GeoVec p = r.at(t);
         if (dot(p - cap_center, p - cap_center) > radius * radius) 
         {
             return false;
         }
-        
+
         // Set hit record
         rec.t = t;
         rec.point = p;
         rec.set_face_normal(r, cap_normal);
+        rec.shape = std::make_shared<Cylinder>(*this);
         rec.material = mat;
         return true;
     }
 
+    std::pair<double, double> compute_uv(const HitRecord& rec) const override
+    {
+        GeoVec p = rec.point - center;
+        double theta = atan2(p.z, p.x);
+        double u = (theta + M_PI) / (2 * M_PI);
+        double v = 1.0 - p.y / height;
+
+        return std::make_pair(u, v);
+    }
+    
     double find_root(Ray& r, Interval ray_interval) const
     {
         GeoVec oc = r.origin - center;

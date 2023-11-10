@@ -10,6 +10,8 @@
 #include "BlinnPhong.h"
 #include "Triangle.h"
 #include "Material.h"
+#include "Texture.h"
+#include "TexturedBlinnPhong.h"
 #include <iostream>
 #include <fstream>
 
@@ -88,6 +90,14 @@ Material parse_material(json& mat_json)
 	double reflectivity = mat_json["reflectivity"].get<double>();
 	double refractiveindex = mat_json["refractiveindex"].get<double>();
 
+	// Extract texture information
+	if (mat_json.find("texture") != mat_json.end())
+	{
+		std::clog << "Texture found" << std::endl;
+		Texture texture("../Textures/" + mat_json["texture"].get<std::string>());
+
+		return Material(ks, kd, specularexponent, diffusecolor, specularcolor, isreflective, reflectivity, isrefractive, refractiveindex, texture);
+	}
 	return Material(ks, kd, specularexponent, diffusecolor, specularcolor, isreflective, reflectivity, isrefractive, refractiveindex);
 }
 void setup_camera(Camera& camera, json& parsed_camera, int num_bounces)
@@ -114,7 +124,7 @@ void setup_camera(Camera& camera, json& parsed_camera, int num_bounces)
 
 int main()
 {
-	json parsed_scene = parseScene("../Scenes/scene.json");
+	json parsed_scene = parseScene("../Scenes/texture_scene.json");
 
 	Camera camera;
 	World world;
@@ -166,6 +176,7 @@ int main()
 		std::clog << "Number of bounces set to " << num_bounces << std::endl;
 	}
 
+	TexturedBlinnPhong textured_blinn_phong;
 	setup_camera(camera, parsed_scene["camera"], num_bounces);
-	camera.render(world, blinn_phong);
+	camera.render(world, textured_blinn_phong);
 }
