@@ -40,7 +40,7 @@ public:
             }
 
             // Add the ambient color
-            GeoVec ambient_color = hitRecord.material.diffuseColor * 0.075;
+            GeoVec ambient_color = hitRecord.material.diffuseColor * 0.1;
 
             
             // if the object is reflective, compute the reflected ray and recursively compute the color

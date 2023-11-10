@@ -24,7 +24,6 @@ json parseScene(const char* filename)
 		std::cerr << "Error: Could not open scene file" << std::endl;
 		return json();
 	}
-
 	// parse scene
 	json scene;
 	scene_file >> scene;
@@ -35,7 +34,7 @@ int main()
 {
 	Camera camera;
 	
-	json parsed_scene = parseScene("../Scenes/scene.json");
+	json parsed_scene = parseScene("../Scenes/simple_phong.json");
 
 	World world;
 	
