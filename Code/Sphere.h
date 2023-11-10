@@ -28,9 +28,18 @@ public:
         rec.point = r.at(rec.t);
         GeoVec outward_normal = (rec.point - center) / radius;
         rec.material = material;
+        rec.shape = std::make_shared<Sphere>(*this);
         rec.set_face_normal(r, outward_normal);
 
         return true;
+    }
+
+    std::pair<double, double> compute_uv(const HitRecord& rec) const override
+    {
+        double theta = acos(-rec.normal.y);
+        double phi = atan2(-rec.normal.z, rec.normal.x) + M_PI;
+
+        return std::make_pair(1 - phi / (2 * M_PI), 1 - theta / M_PI);
     }
 
     double find_root(Ray& r, Interval ray_interval) const
