@@ -3,12 +3,16 @@
 #include "GeoVec.h"
 #include "Ray.h"
 #include "Interval.h"
+#include "BoundingBox.h"
 #include <cmath>
 
 class Sphere : public Hittable {
 public:
     Sphere(GeoVec center, double radius)
-        : center(center), radius(radius) {};
+        : center(center), radius(radius)
+        {
+            box = BoundingBox(center - GeoVec(radius, radius, radius), center + GeoVec(radius, radius, radius));
+        };
 
     void set_material(Material m)
     {
@@ -17,6 +21,7 @@ public:
     
     bool hit(Ray &r, Interval ray_interval, HitRecord& rec) const override
     {
+        // std::clog << "Material: " << material.diffuseColor.x << material.isRefractive << std::endl;
         double root = find_root(r, ray_interval);
         if (!ray_interval.surrounds(root))
         {
@@ -61,8 +66,13 @@ public:
         return root;
     }
 
+    BoundingBox bounding_box() const override
+    {
+        return box;
+    }
 public:
     GeoVec center;
     double radius;
     Material material;
+    BoundingBox box;
 };

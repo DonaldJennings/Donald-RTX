@@ -3,6 +3,7 @@
 #include "GeoVec.h"
 #include "Ray.h"
 #include "Interval.h"
+#include "BoundingBox.h"
 #include<cmath>
 #include<limits>
 
@@ -12,9 +13,19 @@ class Cylinder : public Hittable {
 public:
     Cylinder() {}
     Cylinder(GeoVec center, GeoVec axis, double radius, double height)
-        : center(center), axis(axis), radius(radius), height(height) {}
+        : center(center), axis(axis), radius(radius), height(height) 
+        {
+            GeoVec min = center - GeoVec(radius, height, radius);
+            GeoVec max = center + GeoVec(radius, height, radius);
+            box = BoundingBox(min, max);
+        }
 
     void set_material(Material mat) { this->mat = mat; }
+
+    BoundingBox bounding_box() const override
+    {
+        return box;
+    }
 
     bool hit(Ray& r, Interval ray_interval, HitRecord& rec) const override {
         double root = find_root(r, ray_interval);
@@ -122,4 +133,5 @@ public:
     double radius;
     double height;
     Material mat;
+    BoundingBox box;
 };

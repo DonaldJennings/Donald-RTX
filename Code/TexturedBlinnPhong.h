@@ -25,7 +25,7 @@ public:
         {
             reflected_color = compute_reflected_color(hitRecord, world, ray, depth);
             diffuse_color = (1 - hitRecord.material.reflectivity) * diffuse_color;
-        specular_color = (1 - hitRecord.material.reflectivity) * specular_color;
+            specular_color = (1 - hitRecord.material.reflectivity) * specular_color;
         }
 
         if (hitRecord.material.isRefractive)

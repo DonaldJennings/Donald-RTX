@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include <algorithm>
 
 class GeoVec
 {
@@ -33,6 +34,28 @@ class GeoVec
         double length_squared() const
         {
             return x*x + y*y + z*z;
+        }
+
+        static GeoVec min(const GeoVec& v1, const GeoVec& v2)
+        {
+            return GeoVec(std::min(v1.x, v2.x), std::min(v1.y, v2.y), std::min(v1.z, v2.z));
+        }
+
+        static GeoVec max(const GeoVec& v1, const GeoVec& v2)
+        {
+            return GeoVec(std::max(v1.x, v2.x), std::max(v1.y, v2.y), std::max(v1.z, v2.z));
+        }
+
+        double operator[] (const int& i) const
+        {
+            if (i == 0)
+                return x;
+            else if (i == 1)
+                return y;
+            else if (i == 2)
+                return z;
+            else
+                return 0;
         }
 };
 

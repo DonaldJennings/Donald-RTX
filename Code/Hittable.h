@@ -4,6 +4,8 @@
 #include "Material.h"
 #include "Interval.h"
 
+class BoundingBox;
+
 class Hittable {
 public:
     virtual bool hit(Ray& r, Interval ray_interval, HitRecord& rec) const = 0;
@@ -12,5 +14,7 @@ public:
     {
         return std::make_pair(0, 0);
     };
+
+    virtual BoundingBox bounding_box() const = 0;
 };
 
