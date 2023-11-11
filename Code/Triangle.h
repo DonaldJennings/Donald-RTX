@@ -5,7 +5,12 @@
 class Triangle : public Hittable {
 public:
     Triangle(const GeoVec& v0, const GeoVec& v1, const GeoVec& v2)
-        : m_v0(v0), m_v1(v1), m_v2(v2){}
+        : m_v0(v0), m_v1(v1), m_v2(v2)
+        {
+            GeoVec min = GeoVec::min(v0, GeoVec::min(v1, v2));
+            GeoVec max = GeoVec::max(v0, GeoVec::max(v1, v2));
+            box = BoundingBox(min, max);
+        }
 
     void set_material(Material mat) { this->mat = mat; }
 
@@ -50,7 +55,13 @@ public:
         return true;
     }
 
+    BoundingBox bounding_box() const override
+    {
+        return box;
+    }
+    
 private:
     GeoVec m_v0, m_v1, m_v2;
     Material mat;
+    BoundingBox box;
 };

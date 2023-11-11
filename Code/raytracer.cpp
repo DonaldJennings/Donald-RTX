@@ -45,17 +45,17 @@ void add_world_lights(World& world, json& parsed_scene)
 	std::clog << "Lights setup complete" << std::endl;
 }
 
-void add_hittable_sphere(World& world, json& parsed_sphere, Material material)
+void add_hittable_sphere(std::vector<std::shared_ptr<Hittable>>& shapes, json& parsed_sphere, Material& material)
 {
 	auto center = GeoVec(parsed_sphere["center"][0], parsed_sphere["center"][1], parsed_sphere["center"][2]);
 	double radius = parsed_sphere["radius"].get<double>();
 
 	Sphere sphere(center, radius);
 	sphere.set_material(material);
-	world.add(std::make_shared<Sphere>(sphere));
+	shapes.push_back(std::make_shared<Sphere>(sphere));
 }
 
-void add_hittable_cylinder(World& world, json& parsed_cylinder, Material material)
+void add_hittable_cylinder(std::vector<std::shared_ptr<Hittable>>& shapes, json& parsed_cylinder, Material& material)
 {
 	auto center { GeoVec(parsed_cylinder["center"][0], parsed_cylinder["center"][1], parsed_cylinder["center"][2]) };
 	auto axis { GeoVec(parsed_cylinder["axis"][0], parsed_cylinder["axis"][1], parsed_cylinder["axis"][2]) };
@@ -64,10 +64,10 @@ void add_hittable_cylinder(World& world, json& parsed_cylinder, Material materia
 
 	Cylinder cylinder(center, axis, radius, height);
 	cylinder.set_material(material);
-	world.add(std::make_shared<Cylinder>(cylinder));
+	shapes.push_back(std::make_shared<Cylinder>(cylinder));
 }
 
-void add_hittable_triangle(World& world, json& parsed_triangle, Material material)
+void add_hittable_triangle(std::vector<std::shared_ptr<Hittable>>& shapes, json& parsed_triangle, Material& material)
 {
 	auto v0 { GeoVec(parsed_triangle["v0"][0], parsed_triangle["v0"][1], parsed_triangle["v0"][2]) };
 	auto v1 { GeoVec(parsed_triangle["v1"][0], parsed_triangle["v1"][1], parsed_triangle["v1"][2]) };
@@ -75,7 +75,7 @@ void add_hittable_triangle(World& world, json& parsed_triangle, Material materia
 
 	Triangle triangle(v0, v1, v2);
 	triangle.set_material(material);
-	world.add(std::make_shared<Triangle>(triangle));
+	shapes.push_back(std::make_shared<Triangle>(triangle));
 }
 
 Material parse_material(json& mat_json)
@@ -131,28 +131,24 @@ int main()
 	BinaryRender binary_render;
 	BlinnPhong blinn_phong;
 
-
+	std::vector<std::shared_ptr<Hittable>> hittables;
 	for (auto& shape : parsed_scene["scene"]["shapes"])
 	{
-		Material material_obj;
+		Material material_obj = parse_material(shape["material"]);
 
-		if (parsed_scene["rendermode"] != "binary")
-		{
-			material_obj = parse_material(shape["material"]);
-		}
 		if (shape["type"] == "sphere")
 		{
-			add_hittable_sphere(world, shape, material_obj);
+			add_hittable_sphere(hittables, shape, material_obj);
 			std::clog << "Sphere added" << std::endl;
 		}
 		else if (shape["type"] == "cylinder")
 		{
-			add_hittable_cylinder(world, shape, material_obj);
+			add_hittable_cylinder(hittables, shape, material_obj);
 			std::clog << "Cylinder added" << std::endl;
 		}
 		else if (shape["type"] == "triangle")
 		{
-			add_hittable_triangle(world, shape, material_obj);
+			add_hittable_triangle(hittables, shape, material_obj);
 			std::clog << "Triangle added" << std::endl;
 		}
 		else
@@ -160,6 +156,9 @@ int main()
 			std::cerr << "Shape type not recognised" << std::endl;
 		}
 	}
+
+	world.set_hittables(hittables);
+
 	std::clog << "Shapes setup complete" << std::endl;
 
 	if (parsed_scene["rendermode"] != "binary")

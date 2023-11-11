@@ -1,15 +1,14 @@
 #pragma once
 class Interval {
 public:
-  Interval(double start, double end) : start_(start), end_(end) {}
+  Interval(double start, double end) : min(start), max(end) {}
 
-  double start() const { return start_; }
-  double end() const { return end_; }
-  double length() const { return end_ - start_; }
-  bool contains(double value) const { return value >= start_ && value <= end_; }
-  bool surrounds(double value) const { return start_ < value && value < end_; }
+  double start() const { return min; }
+  double end() const { return max; }
+  double length() const { return max - min; }
+  bool contains(double value) const { return value >= min && value <= max; }
+  bool surrounds(double value) const { return min < value && value < max; }
 
-private:
-  double start_;
-  double end_;
+  double min;
+  double max;
 };
