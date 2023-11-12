@@ -4,8 +4,8 @@
     "camera":
         { 
             "type":"pinhole", 
-            "width":1920, 
-            "height":1080,
+            "width":1200, 
+            "height":800,
             "position":[0.0, 0.75, -0.25],
             "lookAt":[0.0, 0.35, 1.0],
             "upVector":[0.0, 1.0, 0.0],
@@ -42,7 +42,7 @@
                             "isreflective":false,
                             "reflectivity":1.0,
                             "isrefractive":false,
-                            "refractiveindex":1.0 
+                            "refractiveindex":1.0
                         } 
                 },
                 {
@@ -61,7 +61,8 @@
                             "isreflective":false,
                             "reflectivity":1.0,
                             "isrefractive":false,
-                            "refractiveindex":1.0 
+                            "refractiveindex":1.0,
+                            "texture" : "metal_scratch.ppm"
                         } 
                 },
                 {
@@ -114,7 +115,8 @@
                             "isreflective":false,
                             "reflectivity":1.0,
                             "isrefractive":false,
-                            "refractiveindex":1.0 
+                            "refractiveindex":1.0,
+                            "texture" : "red_marble.ppm"
                         } 
                 },
                 { 
@@ -131,9 +133,30 @@
                             "isreflective":true,
                             "reflectivity":1.0,
                             "isrefractive":false,
-                            "refractiveindex":1.0 
+                            "refractiveindex":1.0,
+                            "texture" : "red_marble.ppm"
                         } 
-                }  
+                },
+                {
+                    "type": "cylinder",
+                    "center": [-0.05, 0.19, 2],
+                    "axis": [0, 1, 0],
+                    "radius": 0.1,
+                    "height": 0.2,
+                    "material":
+                        { 
+                            "ks":0.1, 
+                            "kd":0.9, 
+                            "specularexponent":20, 
+                            "diffusecolor":[0.5, 0.5, 0.8],
+                            "specularcolor":[1.0,1.0,1.0],
+                            "isreflective":false,
+                            "reflectivity":0.6,
+                            "isrefractive":false,
+                            "refractiveindex":1.0,
+                            "texture" : "blue_scratch.ppm"
+                        } 
+                }
             ] 
         } 
 }

@@ -5,6 +5,7 @@
 #include "RenderMode.h"
 #include "GeoVec.h"
 #include "Interval.h"
+#include <mutex>
 
 class Camera
 {
@@ -19,9 +20,12 @@ class Camera
 		void setFOV(double fov) { this->fov = fov; };
 		void look_at(GeoVec look_at) { this->look_at_vec = look_at; };
 		void set_up(GeoVec up_vector) { this->up_vector = up_vector; };
-	
+		void render_multithreaded(World& world, RenderMode& render_mode, int j);
+
 	private:
+
 		// Camera Settigns
+		std::mutex mtx;
 		GeoVec camera_pos;
 		GeoVec look_at_vec;
 		GeoVec up_vector;

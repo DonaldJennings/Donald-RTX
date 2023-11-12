@@ -62,6 +62,12 @@ void Camera::render(World& world, RenderMode& render_mode)
                 pixel_color += render_mode.compute_colour(ray, world, num_bounces);
             }
             pixel_color /= num_samples;
+
+            // Apply exposure to each pixel_colour component
+            // pixel_color.x = 1 - exp(-exposure * pixel_color.x);
+            // pixel_color.y = 1 - exp(-exposure * pixel_color.y);
+            // pixel_color.z = 1 - exp(-exposure * pixel_color.z);
+
             PPMWriter::writePixel(std::cout, pixel_color);
         }
 	}

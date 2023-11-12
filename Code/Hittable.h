@@ -5,7 +5,7 @@
 #include "Interval.h"
 
 class BoundingBox;
-
+class Material;
 class Hittable {
 public:
     virtual bool hit(Ray& r, Interval ray_interval, HitRecord& rec) const = 0;
