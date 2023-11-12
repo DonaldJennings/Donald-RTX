@@ -6,6 +6,12 @@
 
 double pi = 3.14159265358979323846;
 
+
+double random_double() 
+{
+    return rand() / (RAND_MAX + 1.0);
+}
+
 Camera::Camera() 
 {
 	width = 720;
@@ -48,8 +54,14 @@ void Camera::render(World& world, RenderMode& render_mode)
         std::clog << "\rScanlines remaining: " << (height - j) << ' ' << std::flush;
         for (int i = 0; i < width; ++i)
         {
-            Ray ray_to_pixel = ray_from_pixel(i, j);
-            GeoVec pixel_color = render_mode.compute_colour(ray_to_pixel, world, num_bounces);
+            GeoVec pixel_color(0, 0, 0);
+            int num_samples = 5;
+            for (int s = 0; s < num_samples; ++s)
+            {
+                Ray ray = sample_ray_from_pixel(i, j);
+                pixel_color += render_mode.compute_colour(ray, world, num_bounces);
+            }
+            pixel_color /= num_samples;
             PPMWriter::writePixel(std::cout, pixel_color);
         }
 	}
@@ -62,4 +74,13 @@ Ray Camera::ray_from_pixel(int i, int j)
     GeoVec ray_origin = camera_pos;
     GeoVec ray_direction = pixel_origin + i*horizontal_pixel_change + j*vertical_pixel_change - camera_pos;
     return Ray(ray_origin, ray_direction);
+}
+
+Ray Camera::sample_ray_from_pixel(int i, int j)
+{
+    // Generate a random ray for the pixel (i,j)
+    auto pixel_centre = pixel_origin + i*horizontal_pixel_change + j*vertical_pixel_change;
+    auto random_point = pixel_centre + random_double()*horizontal_pixel_change + random_double()*vertical_pixel_change;
+    return Ray(camera_pos, random_point - camera_pos);
+
 }

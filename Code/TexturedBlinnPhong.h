@@ -21,14 +21,14 @@ public:
         GeoVec specular_color = compute_specular_color(hitRecord, world, ray);
         GeoVec ambient_color = compute_ambient_color(hitRecord);
 
-        if (hitRecord.material.isReflective)
+        if (hitRecord.material->isReflective)
         {
             reflected_color = compute_reflected_color(hitRecord, world, ray, depth);
-            diffuse_color = (1 - hitRecord.material.reflectivity) * diffuse_color;
-            specular_color = (1 - hitRecord.material.reflectivity) * specular_color;
+            diffuse_color = (1 - hitRecord.material->reflectivity) * diffuse_color;
+            specular_color = (1 - hitRecord.material->reflectivity) * specular_color;
         }
 
-        if (hitRecord.material.isRefractive)
+        if (hitRecord.material->isRefractive)
         {
             refracted_color = compute_refracted_color(hitRecord, world, ray, depth);
             refracted_color = 1.0 * refracted_color;
@@ -51,17 +51,17 @@ public:
                 HitRecord shadow_hit_record;
                 if (!world.hit(shadow_ray, Interval(0.001,  (light->position() - hitRecord.point).length()), shadow_hit_record))
                 {
-                    GeoVec material_color = hitRecord.material.diffuseColor;
-                    if (hitRecord.material.texture != nullptr)
+                    GeoVec material_color = hitRecord.material->diffuseColor;
+                    if (hitRecord.material->texture != nullptr)
                     {
                         if (hitRecord.shape != nullptr)
                         {
                             std::pair<double, double> uv = hitRecord.shape->compute_uv(hitRecord);
-                            material_color = hitRecord.material.texture->sample(uv.first, uv.second);
+                            material_color = hitRecord.material->texture->sample(uv.first, uv.second);
                         }
                     }
                     // Compute the color at the intersection point using the Blinn-Phong shading model
-                    diffuse_color += diffuse(L, N, material_color, hitRecord.material.kd) * light->intensity();
+                    diffuse_color += diffuse(L, N, material_color, hitRecord.material->kd) * light->intensity();
                 }
             }
             return diffuse_color;
@@ -81,7 +81,7 @@ public:
                 if (!world.hit(shadow_ray, Interval(0.001, (light->position() - hitRecord.point).length()), shadow_hit_record))
                 {
                     // Compute the color at the intersection point using the Blinn-Phong shading model
-                    specular_color += specular(L, N, V, hitRecord.material.specularColor, hitRecord.material.ks, hitRecord.material.specularExponent) * light->intensity();
+                    specular_color += specular(L, N, V, hitRecord.material->specularColor, hitRecord.material->ks, hitRecord.material->specularExponent) * light->intensity();
                 }
             }
             return specular_color;
@@ -89,13 +89,13 @@ public:
 
         GeoVec compute_ambient_color(const HitRecord& hitRecord) const
         {
-            GeoVec ambient =  hitRecord.material.diffuseColor;
-            if(hitRecord.material.texture != nullptr)
+            GeoVec ambient =  hitRecord.material->diffuseColor;
+            if(hitRecord.material->texture != nullptr)
             {
                 if(hitRecord.shape != nullptr)
                 {
                     std::pair<double, double> uv = hitRecord.shape->compute_uv(hitRecord);
-                    ambient = hitRecord.material.texture->sample(uv.first, uv.second);
+                    ambient = hitRecord.material->texture->sample(uv.first, uv.second);
                 }
             }
             return ambient * 0.01;
@@ -114,7 +114,7 @@ public:
         GeoVec compute_refracted_color(HitRecord& hitRecord, World& world, Ray& ray, int depth) const
         {
             GeoVec refracted_color = GeoVec(0, 0, 0);
-            double refractive_index = hitRecord.material.refractiveIndex;
+            double refractive_index = hitRecord.material->refractiveIndex;
             GeoVec refracted;
             if (refract(ray.direction, hitRecord.normal, refractive_index, refracted))
             {

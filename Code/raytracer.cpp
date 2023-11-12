@@ -10,6 +10,7 @@
 #include "BlinnPhong.h"
 #include "Triangle.h"
 #include "Material.h"
+#include "Pathtrace.h"
 #include "Texture.h"
 #include "TexturedBlinnPhong.h"
 #include <iostream>
@@ -124,7 +125,7 @@ void setup_camera(Camera& camera, json& parsed_camera, int num_bounces)
 
 int main()
 {
-	json parsed_scene = parseScene("../Scenes/texture_scene.json");
+	json parsed_scene = parseScene("../Scenes/pathtrace_scene.json");
 
 	Camera camera;
 	World world;
@@ -175,7 +176,8 @@ int main()
 		std::clog << "Number of bounces set to " << num_bounces << std::endl;
 	}
 
+	Pathtrace pathtrace;
 	TexturedBlinnPhong textured_blinn_phong;
 	setup_camera(camera, parsed_scene["camera"], num_bounces);
-	camera.render(world, textured_blinn_phong);
+	camera.render(world, pathtrace);
 }

@@ -50,7 +50,7 @@ public:
         rec.point = r.at(t);
         GeoVec outward_normal = normalize(cross(e1, e2));
         rec.set_face_normal(r, outward_normal);
-        rec.material = mat;
+        rec.material = std::make_shared<Material>(mat);
 
         return true;
     }

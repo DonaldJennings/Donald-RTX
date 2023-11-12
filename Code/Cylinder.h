@@ -59,7 +59,7 @@ public:
         GeoVec outward_normal = normalize((cylinder_point - center) - dot(cylinder_point - center, axis) * axis);
         rec.set_face_normal(r, outward_normal);
         rec.shape = std::make_shared<Cylinder>(*this);
-        rec.material = mat;
+        rec.material = std::make_shared<Material>(mat);
 
         return true;
     }
@@ -84,7 +84,7 @@ public:
         rec.point = p;
         rec.set_face_normal(r, cap_normal);
         rec.shape = std::make_shared<Cylinder>(*this);
-        rec.material = mat;
+        rec.material = std::make_shared<Material>(mat);
         return true;
     }
 

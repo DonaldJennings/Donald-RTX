@@ -32,7 +32,7 @@ public:
         rec.t = root;
         rec.point = r.at(rec.t);
         GeoVec outward_normal = (rec.point - center) / radius;
-        rec.material = material;
+        rec.material = std::make_shared<Material>(material);
         rec.shape = std::make_shared<Sphere>(*this);
         rec.set_face_normal(r, outward_normal);
 
