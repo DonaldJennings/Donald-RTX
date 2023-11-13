@@ -1,0 +1,30 @@
+define cook torrance
+
+GeoVec cook_torrance_brdf(const GeoVec& normal, const GeoVec& light_dir, const GeoVec& view_dir, const GeoVec& specular_color, double roughness, double fresnel) const {
+    GeoVec half_vector = normalize(light_dir + view_dir);
+    double NdotH = std::max(dot(normal, half_vector), 0.0);
+    double NdotV = std::max(dot(normal, view_dir), 0.0);
+    double VdotH = std::max(dot(view_dir, half_vector), 0.0);
+    double NdotL = std::max(dot(normal, light_dir), 0.0);
+
+    // Microfacet distribution (GGX)
+    double alpha = roughness * roughness;
+    double alpha2 = alpha * alpha;
+    double denom = (NdotH * NdotH) * (alpha2 - 1.0) + 1.0;
+    double D = alpha2 / (PI * denom * denom);
+
+    // Geometric attenuation (Schlick's approximation)
+    double k = roughness / 2.0;
+    double G = NdotV / (NdotV * (1.0 - k) + k);
+    double G' = NdotL / (NdotL * (1.0 - k) + k);
+    double G = G * G';
+
+    // Fresnel (Schlick's approximation)
+    double F = pow(1.0 - VdotH, 5.0);
+    F = fresnel + (1.0 - fresnel) * F;
+
+    // Compute the specular contribution
+    double spec = (D * G * F) / (4.0 * NdotV * NdotL + 0.001); // add a small constant to avoid division by zero
+
+    return specular_color * spec;
+}

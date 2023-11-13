@@ -3,13 +3,20 @@
 #include<limits>
 #include<cmath>
 #include<math.h>
+#include<thread>
+#include<chrono>
+#include<random>
+#include<algorithm>
+
 
 double pi = 3.14159265358979323846;
 
 
 double random_double() 
 {
-    return rand() / (RAND_MAX + 1.0);
+    static thread_local std::mt19937 generator(std::random_device{}());
+    std::uniform_real_distribution<double> distribution(0.0, 1.0);
+    return distribution(generator);
 }
 
 Camera::Camera() 
@@ -47,15 +54,18 @@ void Camera::refresh_viewport_settings()
 
 void Camera::render(World& world, RenderMode& render_mode)
 {
-	refresh_viewport_settings();
-	PPMWriter::writeHeader(std::cout, width, height);
-    for (int j = 0; j < height; ++j)
-    {
-        std::clog << "\rScanlines remaining: " << (height - j) << ' ' << std::flush;
+    auto startTimer = std::chrono::high_resolution_clock::now();
+    refresh_viewport_settings();
+    PPMWriter::writeHeader(std::cout, width, height);
+
+    std::vector<std::thread> threads;
+    std::vector<GeoVec> pixel_colours(width * height);
+
+    auto render_row = [&](int j) {
         for (int i = 0; i < width; ++i)
         {
             GeoVec pixel_color(0, 0, 0);
-            int num_samples = 5;
+            int num_samples = 32;
             for (int s = 0; s < num_samples; ++s)
             {
                 Ray ray = sample_ray_from_pixel(i, j);
@@ -63,17 +73,38 @@ void Camera::render(World& world, RenderMode& render_mode)
             }
             pixel_color /= num_samples;
 
-            // Apply exposure to each pixel_colour component
-            // pixel_color.x = 1 - exp(-exposure * pixel_color.x);
-            // pixel_color.y = 1 - exp(-exposure * pixel_color.y);
-            // pixel_color.z = 1 - exp(-exposure * pixel_color.z);
-
-            PPMWriter::writePixel(std::cout, pixel_color);
+            // Apply exposure
+            pixel_color.x = 1 - exp(-exposure * pixel_color.x);
+            pixel_color.y = 1 - exp(-exposure * pixel_color.y);
+            pixel_color.z = 1 - exp(-exposure * pixel_color.z);
+            
+            pixel_colours[j * width + i] = pixel_color;
         }
-	}
-    std::clog << "\nDone.\n";
-}
+        progressCounter++;
+        if (progressCounter % 10 == 0)
+        {
+            std::lock_guard<std::mutex> lock(writeMutex);
+            std::clog << "\rScanlines remaining: " << (height - progressCounter) << ' ' << std::flush;
+        }
+    };
 
+    for (int j = 0; j < height; ++j)
+    {
+        threads.push_back(std::thread(render_row, j));
+    }
+
+    for (auto& thread : threads)
+    {
+        thread.join();
+    }
+
+    for (const auto& pixel_color : pixel_colours)
+    {
+        PPMWriter::writePixel(std::cout, pixel_color);
+    }
+
+    std::clog << "Render complete in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - startTimer).count() << "s" << std::endl;
+}
 
 Ray Camera::ray_from_pixel(int i, int j)
 {
@@ -87,6 +118,6 @@ Ray Camera::sample_ray_from_pixel(int i, int j)
     // Generate a random ray for the pixel (i,j)
     auto pixel_centre = pixel_origin + i*horizontal_pixel_change + j*vertical_pixel_change;
     auto random_point = pixel_centre + random_double()*horizontal_pixel_change + random_double()*vertical_pixel_change;
-    return Ray(camera_pos, random_point - camera_pos);
+    return Ray(camera_pos, normalize(random_point - camera_pos));
 
 }

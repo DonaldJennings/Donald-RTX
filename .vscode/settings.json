@@ -83,6 +83,8 @@
         "xtr1common": "cpp",
         "xtree": "cpp",
         "xutility": "cpp",
-        "cstdarg": "cpp"
+        "cstdarg": "cpp",
+        "condition_variable": "cpp",
+        "semaphore": "cpp"
     }
 }

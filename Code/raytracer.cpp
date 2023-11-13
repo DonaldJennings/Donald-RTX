@@ -90,16 +90,31 @@ Material parse_material(json& mat_json)
 	bool isrefractive = mat_json["isrefractive"].get<bool>();
 	double reflectivity = mat_json["reflectivity"].get<double>();
 	double refractiveindex = mat_json["refractiveindex"].get<double>();
+	double roughness = 1;
+	double fresnel = 0.1;
+	if (mat_json.find("roughness") != mat_json.end())
+	{
+		std::clog << "Roughness found" << std::endl;
+		double roughness = mat_json["roughness"].get<double>();
+	}
+
+	if (mat_json.find("fresnel") != mat_json.end())
+	{
+		std::clog << "Fresnel found" << std::endl;
+		double fresnel = mat_json["fresnel"].get<double>();
+	}
+
 
 	// Extract texture information
+	Texture texture;
 	if (mat_json.find("texture") != mat_json.end())
 	{
 		std::clog << "Texture found" << std::endl;
 		Texture texture("../Textures/" + mat_json["texture"].get<std::string>());
 
-		return Material(ks, kd, specularexponent, diffusecolor, specularcolor, isreflective, reflectivity, isrefractive, refractiveindex, texture);
+		return Material(ks, kd, specularexponent, diffusecolor, specularcolor, isreflective, reflectivity, isrefractive, refractiveindex, texture, roughness, fresnel);
 	}
-	return Material(ks, kd, specularexponent, diffusecolor, specularcolor, isreflective, reflectivity, isrefractive, refractiveindex);
+	return Material(ks, kd, specularexponent, diffusecolor, specularcolor, isreflective, reflectivity, isrefractive, refractiveindex, roughness, fresnel);
 }
 void setup_camera(Camera& camera, json& parsed_camera, int num_bounces)
 {
@@ -179,5 +194,7 @@ int main()
 	Pathtrace pathtrace;
 	TexturedBlinnPhong textured_blinn_phong;
 	setup_camera(camera, parsed_scene["camera"], num_bounces);
+
+	std::clog << "Starting render" << std::endl;
 	camera.render(world, pathtrace);
 }

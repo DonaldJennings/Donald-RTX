@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GeoVec.h"
-
+#include <mutex>
 #include <ostream>
 class PPMWriter
 {

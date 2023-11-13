@@ -1,7 +1,7 @@
 #pragma once
 #include <cmath>
 #include <algorithm>
-
+#include <iostream>
 class GeoVec
 {
     public:
@@ -125,7 +125,7 @@ inline GeoVec operator+= (GeoVec& v1, const GeoVec& v2)
 
 inline GeoVec normalize(const GeoVec& v)
 {
-    return v / v.length();
+return v / v.length();
 }
 
 inline GeoVec reflect(const GeoVec& v, const GeoVec& n)
@@ -144,4 +144,12 @@ inline bool refract(const GeoVec& v, const GeoVec& n, double ni_over_nt, GeoVec&
         return true;
     }
     return false;
+}
+
+
+// write a function for stream output
+inline std::ostream& operator<< (std::ostream& os, const GeoVec& v)
+{
+    os << v.x << ' ' << v.y << ' ' << v.z;
+    return os;
 }

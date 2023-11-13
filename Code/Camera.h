@@ -6,6 +6,9 @@
 #include "GeoVec.h"
 #include "Interval.h"
 #include <mutex>
+#include <atomic>
+#include <thread>
+#include <chrono>
 
 class Camera
 {
@@ -20,12 +23,13 @@ class Camera
 		void setFOV(double fov) { this->fov = fov; };
 		void look_at(GeoVec look_at) { this->look_at_vec = look_at; };
 		void set_up(GeoVec up_vector) { this->up_vector = up_vector; };
-		void render_multithreaded(World& world, RenderMode& render_mode, int j);
 
 	private:
 
 		// Camera Settigns
-		std::mutex mtx;
+		std::mutex writeMutex;
+		std::mutex worldMutex;
+		std::atomic<int> progressCounter;
 		GeoVec camera_pos;
 		GeoVec look_at_vec;
 		GeoVec up_vector;
@@ -50,6 +54,7 @@ class Camera
 
 		Ray ray_from_pixel(int i, int j);
 		Ray sample_ray_from_pixel(int i, int j);
+		void render_row(World& world, RenderMode& render_mode, int row, int width, std::vector<GeoVec>& pixel_colours);
 		void refresh_viewport_settings();
 
 };
