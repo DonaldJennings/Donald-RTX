@@ -65,7 +65,7 @@ void Camera::render(World& world, RenderMode& render_mode)
         for (int i = 0; i < width; ++i)
         {
             GeoVec pixel_color(0, 0, 0);
-            int num_samples = 32;
+            int num_samples = 10;
             for (int s = 0; s < num_samples; ++s)
             {
                 Ray ray = sample_ray_from_pixel(i, j);

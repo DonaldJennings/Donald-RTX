@@ -13,6 +13,7 @@
 #include "Pathtrace.h"
 #include "Texture.h"
 #include "TexturedBlinnPhong.h"
+#include "Plane.h"
 #include <iostream>
 #include <fstream>
 
@@ -77,6 +78,15 @@ void add_hittable_triangle(std::vector<std::shared_ptr<Hittable>>& shapes, json&
 	Triangle triangle(v0, v1, v2);
 	triangle.set_material(material);
 	shapes.push_back(std::make_shared<Triangle>(triangle));
+}
+
+void add_hittable_plane(std::vector<std::shared_ptr<Hittable>>& shapes, json& parsed_plane, Material& material)
+{
+	auto center { GeoVec(parsed_plane["center"][0], parsed_plane["center"][1], parsed_plane["center"][2]) };
+	auto normal { GeoVec(parsed_plane["normal"][0], parsed_plane["normal"][1], parsed_plane["normal"][2]) };
+
+	Plane plane(center, normal, material);
+	shapes.push_back(std::make_shared<Plane>(plane));
 }
 
 Material parse_material(json& mat_json)
