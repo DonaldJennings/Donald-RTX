@@ -7,13 +7,13 @@
 #include "Cylinder.h"
 #include "GeoVec.h"
 #include "BinaryRender.h"
+#include "BHVNode.h"
 #include "BlinnPhong.h"
 #include "Triangle.h"
 #include "Material.h"
 #include "Pathtrace.h"
 #include "Texture.h"
 #include "TexturedBlinnPhong.h"
-#include "Plane.h"
 #include <iostream>
 #include <fstream>
 
@@ -80,15 +80,6 @@ void add_hittable_triangle(std::vector<std::shared_ptr<Hittable>>& shapes, json&
 	shapes.push_back(std::make_shared<Triangle>(triangle));
 }
 
-void add_hittable_plane(std::vector<std::shared_ptr<Hittable>>& shapes, json& parsed_plane, Material& material)
-{
-	auto center { GeoVec(parsed_plane["center"][0], parsed_plane["center"][1], parsed_plane["center"][2]) };
-	auto normal { GeoVec(parsed_plane["normal"][0], parsed_plane["normal"][1], parsed_plane["normal"][2]) };
-
-	Plane plane(center, normal, material);
-	shapes.push_back(std::make_shared<Plane>(plane));
-}
-
 Material parse_material(json& mat_json)
 {	
 	double ks = mat_json["ks"].get<double>();
@@ -153,7 +144,6 @@ int main()
 	json parsed_scene = parseScene("../Scenes/pathtrace_scene.json");
 
 	Camera camera;
-	World world;
 	BinaryRender binary_render;
 	BlinnPhong blinn_phong;
 
@@ -183,17 +173,8 @@ int main()
 		}
 	}
 
-	world.set_hittables(hittables);
-
+	std::clog << "Number of shapes: " << hittables.size() << std::endl;
 	std::clog << "Shapes setup complete" << std::endl;
-
-	if (parsed_scene["rendermode"] != "binary")
-	{
-		add_world_lights(world, parsed_scene);
-	}
-
-	world.backgroundColour = GeoVec(parsed_scene["scene"]["backgroundcolor"][0], parsed_scene["scene"]["backgroundcolor"][1], parsed_scene["scene"]["backgroundcolor"][2]);
-
 	int num_bounces = 8;
 	if (parsed_scene["rendermode"] != "binary")
 	{
@@ -205,6 +186,16 @@ int main()
 	TexturedBlinnPhong textured_blinn_phong;
 	setup_camera(camera, parsed_scene["camera"], num_bounces);
 
-	std::clog << "Starting render" << std::endl;
-	camera.render(world, pathtrace);
+	std::clog << "Constructing BVH" << std::endl;
+
+	World world_bvh{std::make_shared<BVHNode>(hittables, 0, hittables.size())};
+	
+	if (parsed_scene["rendermode"] != "binary")
+	{
+		add_world_lights(world_bvh, parsed_scene);
+	}
+	world_bvh.backgroundColour = GeoVec(parsed_scene["scene"]["backgroundcolor"][0], parsed_scene["scene"]["backgroundcolor"][1], parsed_scene["scene"]["backgroundcolor"][2]);
+
+	std::clog << "BVH constructed" << std::endl;
+	camera.render(world_bvh, pathtrace);
 }

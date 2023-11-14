@@ -36,16 +36,6 @@ class GeoVec
             return x*x + y*y + z*z;
         }
 
-        static GeoVec min(const GeoVec& v1, const GeoVec& v2)
-        {
-            return GeoVec(std::min(v1.x, v2.x), std::min(v1.y, v2.y), std::min(v1.z, v2.z));
-        }
-
-        static GeoVec max(const GeoVec& v1, const GeoVec& v2)
-        {
-            return GeoVec(std::max(v1.x, v2.x), std::max(v1.y, v2.y), std::max(v1.z, v2.z));
-        }
-
         double operator[] (const int& i) const
         {
             if (i == 0)
@@ -57,7 +47,22 @@ class GeoVec
             else
                 return 0;
         }
+
+
+static GeoVec min(const GeoVec& a, const GeoVec& b) {
+    return GeoVec(std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z));
+}
+
+static GeoVec max(const GeoVec& a, const GeoVec& b) {
+    return GeoVec(std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z));
+}
 };
+
+inline bool operator<(const GeoVec& lhs, const GeoVec& rhs) {
+    // Compare GeoVec objects based on some criteria.
+    // This example compares the length of the vectors.
+    return lhs.length() < rhs.length();
+}
 
 inline GeoVec operator+ (const GeoVec& v1, const GeoVec& v2)
 {

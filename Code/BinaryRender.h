@@ -14,4 +14,7 @@ public:
             return GeoVec(0, 0, 0);
         }
     }
+
+protected:
+    std::string name = "BinaryRender";
 };

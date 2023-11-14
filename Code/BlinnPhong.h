@@ -14,12 +14,20 @@ public:
         HitRecord hitRecord;
 
         // If we've exceed the ray bounce limit or we don't hit anything, return the background colour
-        if (depth <= 0 || !world.hit(ray, Interval(0.001, std::numeric_limits<double>::max()), hitRecord))
+        if (depth <= 0)
+        {
+            std::clog << "Depth limit reached" << std::endl;
             return world.backgroundColour;
+        }
+
+        if (!world.hit(ray, Interval(0.001, std::numeric_limits<double>::infinity()), hitRecord))
+        {
+            return world.backgroundColour;
+        }
 
         GeoVec diffuse_color = compute_diffuse_color(hitRecord, world);
         GeoVec specular_color = compute_specular_color(hitRecord, world, ray);
-        GeoVec ambient_color = compute_ambient_color(hitRecord);
+        GeoVec ambient_color = compute_ambient_color(hitRecord, world);
 
         if (hitRecord.material->isReflective)
         {
@@ -69,7 +77,7 @@ public:
 
                 Ray shadow_ray(hitRecord.point, L);
                 HitRecord shadow_hit_record;
-                if (!world.hit(shadow_ray, Interval(0.001, (light->position() - hitRecord.point).length()), shadow_hit_record))
+                if (!world.hit(shadow_ray, Interval(0.0, (light->position() - hitRecord.point).length()), shadow_hit_record))
                 {
                     // Compute the color at the intersection point using the Blinn-Phong shading model
                     specular_color += specular(L, N, V, hitRecord.material->specularColor, hitRecord.material->ks, hitRecord.material->specularExponent) * light->intensity();
@@ -78,9 +86,9 @@ public:
             return specular_color;
         }
 
-        GeoVec compute_ambient_color(const HitRecord& hitRecord) const
+        GeoVec compute_ambient_color(const HitRecord& hitRecord, const World& world) const
         {
-            return hitRecord.material->diffuseColor * 0.1;
+            return hitRecord.material->diffuseColor * world.backgroundColour * 1.0;
         }
 
         GeoVec compute_reflected_color(HitRecord& hitRecord, World& world, Ray& ray, int depth) const
@@ -109,15 +117,16 @@ public:
         GeoVec diffuse(const GeoVec& light_dir, const GeoVec& normal, const GeoVec& color, float intensity) const
         {
             float diffuse_factor = std::max(0.0, dot(light_dir, normal));
-            return color * diffuse_factor * intensity;
+            return color * diffuse_factor;
         }
 
         GeoVec specular(const GeoVec& light_dir, const GeoVec& normal, const GeoVec& view_dir, const GeoVec& color, float intensity, float shininess) const
         {
             GeoVec halfway_dir = normalize(light_dir + view_dir);
             float specular_factor = std::pow(std::max(0.0, dot(normal, halfway_dir)), shininess);
-            return color * specular_factor * intensity;
+            return color * specular_factor;
         }
 
-
+protected:
+    std::string name = "BlinnPhong";
 };

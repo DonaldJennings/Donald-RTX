@@ -60,8 +60,12 @@ public:
         auto root_nature = sqrt(discriminant);
         auto root = (-b - root_nature) / a;
         if (!ray_interval.surrounds(root))
-        {
+        {   
             root = (-b + root_nature) / a;
+            if (!ray_interval.surrounds(root))
+            {
+                return false;
+            }
         }
         return root;
     }

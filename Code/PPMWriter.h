@@ -7,6 +7,6 @@ class PPMWriter
 {
 public:
 	static void writeHeader(std::ostream& out, int width, int height);
-	static void writePixel(std::ostream& out, GeoVec colour);
+	static void writePixel(std::ostream& out, GeoVec colour, double exposure = 0.5);
 };
 

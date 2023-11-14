@@ -2,6 +2,11 @@
 #include "HitRecord.h"
 #include "Ray.h"
 #include "GeoVec.h"
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 class Pathtrace : public RenderMode
 {
 public:
@@ -10,52 +15,41 @@ public:
 
     GeoVec compute_colour(Ray& ray, World& world, int depth) const override
     {
-        if (depth <= 0)
-            return GeoVec(0, 0, 0);
-        
         HitRecord hitRecord;
-    if (world.hit(ray, Interval(0.001, std::numeric_limits<double>::max()), hitRecord))
-    {
+        if (depth <= 0 || !world.hit(ray, Interval(0.001, std::numeric_limits<double>::infinity()), hitRecord))
+        {
+            // std::clog << "Depth limit reached" << std::endl;
+            // Gradient blue sky
+            GeoVec unit_direction = normalize(ray.direction);
+            double t = 0.5 * (unit_direction.y - 1.0);
+            return (1.0 - t) * GeoVec(1.0, 1.0, 1.0) + t * world.backgroundColour;
+        }
+
         Ray scattered;
         GeoVec attenuation;
-        if (scatter(ray, hitRecord, scattered, attenuation))
-        {
-            GeoVec shadow(0, 0, 0);
-            for (auto& light : world.lights)
-            {
-                int num_samples = 2; // Number of samples for soft shadows
-                GeoVec soft_shadow(0, 0, 0);
-                for (int i = 0; i < num_samples; i++)
-                {
-                    // Sample a point on the light source
-                    GeoVec light_sample = light->sample();
-                    Ray shadow_ray(hitRecord.point, normalize(light_sample - hitRecord.point));
-                    HitRecord shadow_hit_record;
-                    if (!world.hit(shadow_ray, Interval(0.001, (light_sample - hitRecord.point).length()), shadow_hit_record))
-                    {   
-                        GeoVec adjusted_reflection;
-                        if (hitRecord.material->isReflective)
-                        {
-                            adjusted_reflection = attenuation;
-                        }
-                        else
-                        {
-                            adjusted_reflection = hitRecord.material->diffuseColor * attenuation;
-                        }
-                        soft_shadow += light->intensity() * adjusted_reflection * compute_colour(scattered, world, depth - 1);
-                    }
-                }
-                shadow += soft_shadow / num_samples;
-            }
-            return shadow;
-        }
-    }
-    
-    // Gradient blue sky
-    GeoVec unit_direction = normalize(ray.direction);
-    double t = 0.5 * (unit_direction.y - 1.0);
-    return (1.0 - t) * GeoVec(1.0, 1.0, 1.0) + t * world.backgroundColour;
 
+        scatter(ray, hitRecord, scattered, attenuation);
+        GeoVec shadow(0, 0, 0);
+        GeoVec colour(0, 0, 0);
+        for (auto& light : world.lights)
+        {
+            int num_samples = 5; // Number of samples for soft shadows
+            GeoVec soft_shadow(0, 0, 0);
+            for (int i = 0; i < num_samples; i++)
+            {
+                // Sample a point on the light source
+                GeoVec light_sample = light->sample();
+                Ray shadow_ray(hitRecord.point, normalize(light_sample - hitRecord.point));
+                HitRecord shadow_hit_record;
+                if (!world.hit(shadow_ray, Interval(0.001, (light_sample - hitRecord.point).length()), shadow_hit_record))
+                {   
+                    soft_shadow += light->intensity();
+                }
+            }
+            shadow += soft_shadow / num_samples;
+            colour += shadow * attenuation * compute_colour(scattered, world, depth - 1);
+        }
+        return colour;
     }
 
 private:

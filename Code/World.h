@@ -6,30 +6,31 @@
 #include "Sphere.h"
 #include "Cylinder.h"
 #include "nlohmann/json.hpp"
+#include "BoundingBox.h"
 #include "Interval.h"
 #include "Light.h"
-#include "BHVNode.h"
 
 using json = nlohmann::json;
 
-class World
+class World : Hittable
 {
 public:
+    World() : box(BoundingBox()) {}
+
+    World(std::shared_ptr<Hittable> hittable)
+    {
+        add(hittable);
+    }
+
     GeoVec backgroundColour;
 
     std::vector<std::shared_ptr<Hittable>> hittables;
     std::vector<std::shared_ptr<Light>> lights;
-    std::shared_ptr<BVHNode> root;
 
     void add(std::shared_ptr<Hittable> hittable)
     {
         hittables.push_back(hittable);
-    }
-
-    void set_hittables(std::vector<std::shared_ptr<Hittable>> hittables)
-    {
-        this->hittables = hittables;
-        root = std::make_shared<BVHNode>(hittables, 0, hittables.size());
+        box = BoundingBox(box, hittable->bounding_box());
     }
 
     void add_light(std::shared_ptr<Light> light)
@@ -42,35 +43,28 @@ public:
         hittables.clear();
     }
 
-    bool hit(Ray &ray, Interval ray_interval, HitRecord &hitRecord)
+    bool hit(Ray &ray, Interval ray_interval, HitRecord &hitRecord) const override
     {
-        return root->hit(ray, ray_interval, hitRecord);
-    }
-
-    static World fromParsedScene(json scene)
-    {
-        // Get Hittables
-        World world;
-
-        world.backgroundColour = GeoVec(scene["backgroundcolor"][0], scene["backgroundcolor"][1], scene["backgroundcolor"][2]);
-        for (auto &shape : scene["shapes"])
+        HitRecord temp_hitRecord;
+        bool hit_anything = false;
+        double closest_so_far = ray_interval.end();
+        for (const auto& hittable : hittables)
         {
-            if (shape["type"] == "sphere")
+            if (hittable->hit(ray, Interval(ray_interval.start(), closest_so_far), temp_hitRecord))
             {
-                auto sphere = std::make_shared<Sphere>(GeoVec(shape["center"][0], shape["center"][1], shape["center"][2]), shape["radius"]);
-                world.add(sphere);
-            }
-            else if (shape["type"] == "cylinder")
-            {
-                auto cylinder = std::make_shared<Cylinder>(
-                    GeoVec(shape["center"][0], shape["center"][1], shape["center"][2]),
-                    GeoVec(shape["axis"][0], shape["axis"][1], shape["axis"][2]),
-                    shape["radius"],
-                    shape["height"]);
-
-                world.add(cylinder);
+                hit_anything = true;
+                closest_so_far = temp_hitRecord.t;
+                hitRecord = temp_hitRecord;
             }
         }
-        return world;
-    };
+        return hit_anything;
+    }
+
+    BoundingBox bounding_box() const override
+    {
+        return box;
+    }
+
+private:
+    BoundingBox box;
 };

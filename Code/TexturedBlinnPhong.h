@@ -136,4 +136,7 @@ public:
             float specular_factor = std::pow(std::max(0.0, dot(normal, halfway_dir)), shininess);
             return color * specular_factor * intensity;
         }
+
+protected:
+    std::string name = "TexturedBlinnPhong";
 };

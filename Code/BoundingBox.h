@@ -5,66 +5,90 @@
 #include "Interval.h"
 #include <limits>
 
-class BoundingBox : Hittable 
+class BoundingBox
 {
 public:
-    BoundingBox() 
-        : min_(GeoVec(std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max())),
-          max_(GeoVec(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::lowest(), std::numeric_limits<double>::lowest())) 
-    {}
+    BoundingBox() {};
 
-    BoundingBox(GeoVec a, GeoVec b) : min_(a), max_(b) {}
+    BoundingBox(const Interval& x, const Interval& y, const Interval& z) : x_(x), y_(y), z_(z) {}
 
-    bool hit(Ray& r, Interval ray_interval, HitRecord& rec) const override
+    BoundingBox(const GeoVec& a, const GeoVec& b)
     {
-        for (int a = 0; a < 3; a++)
+        double epsilon = 0.01;  // Adjust this value as needed.
+        x_ = Interval(fmin(a[0], b[0]), fmax(a[0], b[0]) + epsilon);
+        y_ = Interval(fmin(a[1], b[1]), fmax(a[1], b[1]) + epsilon);
+        z_ = Interval(fmin(a[2], b[2]), fmax(a[2], b[2]) + epsilon);
+    }
+
+    BoundingBox(const BoundingBox& box_a, const BoundingBox& box_b)
+    {
+        x_ = Interval(box_a.x_, box_b.x_);
+        y_ = Interval(box_a.y_, box_b.y_);
+        z_ = Interval(box_a.z_, box_b.z_);
+    }
+
+    GeoVec min() const
+    {
+        return GeoVec(x_.start(), y_.start(), z_.start());
+    }
+
+    GeoVec max() const
+    {
+        return GeoVec(x_.end(), y_.end(), z_.end());
+    }
+
+
+    Interval get_axis(int axis) const
+    {
+        if (axis == 2) return z_;
+        if (axis == 1) return y_;
+        if (axis == 0) return x_;
+
+        std::clog << "Invalid axis" << std::endl;
+        return x_;
+
+    }
+
+bool hit(const Ray& r, Interval ray_t) const {
+    double epsilon = 0.0001;  // Adjust this value as needed.
+    for (int a = 0; a < 3; a++) {
+        auto invD = 1 / r.direction[a];
+        auto orig = r.origin[a];
+
+        auto t0 = (get_axis(a).start() - orig) * invD - epsilon;
+        auto t1 = (get_axis(a).end() - orig) * invD + epsilon;
+
+        if (invD < 0)
+            std::swap(t0, t1);
+
+        if (t0 > ray_t.start()) ray_t.min_ = t0;
+        if (t1 < ray_t.end()) ray_t.max_ = t1;
+
+        if (ray_t.max_ <= ray_t.min_)
         {
-            auto invD = 1.0f / r.direction[a];
-            auto t0 = (min_[a] - r.origin[a]) * invD;
-            auto t1 = (max_[a] - r.origin[a]) * invD;
-            if (invD < 0.0f)
-                std::swap(t0, t1);
-            ray_interval.min = t0 > ray_interval.start() ? t0 : ray_interval.start();
-            ray_interval.max = t1 < ray_interval.end() ? t1 : ray_interval.end();
-            if (ray_interval.end() <= ray_interval.start())
-                return false;
+            return false;
         }
-        return true;   
     }
+    return true;
+}
 
-    BoundingBox bounding_box() const override
+    Interval get_x() const
     {
-        return *this;
+        return x_;
     }
 
-    void expand(const GeoVec& point) 
+    Interval get_y() const
     {
-        min_ = GeoVec::min(min_, point);
-        max_ = GeoVec::max(max_, point);
+        return y_;
     }
 
-    void expand(const BoundingBox& other) {
-        min_ = GeoVec::min(min_, other.min_);
-        max_ = GeoVec::max(max_, other.max_);
+    Interval get_z() const
+    {
+        return z_;
     }
+    private:
+        Interval x_;
+        Interval y_;
+        Interval z_;
 
-    GeoVec center() const {
-        return (min_ + max_) * 0.5f;
-    }
-
-    GeoVec size() const {
-        return max_ - min_;
-    }
-
-    GeoVec min() const {
-        return min_;
-    }
-
-    GeoVec max() const {
-        return max_;
-    }
-
-private:
-    GeoVec min_;
-    GeoVec max_;
 };

@@ -61,23 +61,29 @@ void Camera::render(World& world, RenderMode& render_mode)
     std::vector<std::thread> threads;
     std::vector<GeoVec> pixel_colours(width * height);
 
+    std::clog << "Rendering " << width << "x" << height << " image" << std::endl;
+
     auto render_row = [&](int j) {
         for (int i = 0; i < width; ++i)
         {
             GeoVec pixel_color(0, 0, 0);
-            int num_samples = 10;
-            for (int s = 0; s < num_samples; ++s)
-            {
-                Ray ray = sample_ray_from_pixel(i, j);
-                pixel_color += render_mode.compute_colour(ray, world, num_bounces);
-            }
-            pixel_color /= num_samples;
 
-            // Apply exposure
-            pixel_color.x = 1 - exp(-exposure * pixel_color.x);
-            pixel_color.y = 1 - exp(-exposure * pixel_color.y);
-            pixel_color.z = 1 - exp(-exposure * pixel_color.z);
-            
+            // if render mode is pathtrace then sample multiple rays per pixel
+            if (render_mode.get_name() == "pathtrace")
+            {
+                int num_samples = 10;
+                auto samples = get_pixel_samples(i, j, num_samples);
+                for (auto& ray : samples)
+                {
+                    pixel_color += render_mode.compute_colour(*ray, world, num_bounces);
+                }
+                pixel_color /= num_samples;
+            }
+            else
+            {
+                Ray ray = ray_from_pixel(i, j);
+                pixel_color = render_mode.compute_colour(ray, world, num_bounces);
+            }
             pixel_colours[j * width + i] = pixel_color;
         }
         progressCounter++;
@@ -100,17 +106,21 @@ void Camera::render(World& world, RenderMode& render_mode)
 
     for (const auto& pixel_color : pixel_colours)
     {
-        PPMWriter::writePixel(std::cout, pixel_color);
+        PPMWriter::writePixel(std::cout, pixel_color, exposure);
     }
 
-    std::clog << "Render complete in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - startTimer).count() << "s" << std::endl;
+    // print render time in 0.00s format
+    auto endTimer = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = endTimer - startTimer;
+    std::clog << "\rRender time: " << std::fixed << std::setprecision(2) << elapsed.count() << "seconds";
+
 }
 
 Ray Camera::ray_from_pixel(int i, int j)
 {
     GeoVec ray_origin = camera_pos;
     GeoVec ray_direction = pixel_origin + i*horizontal_pixel_change + j*vertical_pixel_change - camera_pos;
-    return Ray(ray_origin, ray_direction);
+    return Ray(ray_origin, normalize(ray_direction));
 }
 
 Ray Camera::sample_ray_from_pixel(int i, int j)
@@ -120,4 +130,14 @@ Ray Camera::sample_ray_from_pixel(int i, int j)
     auto random_point = pixel_centre + random_double()*horizontal_pixel_change + random_double()*vertical_pixel_change;
     return Ray(camera_pos, normalize(random_point - camera_pos));
 
+}
+
+std::vector<std::shared_ptr<Ray>> Camera::get_pixel_samples(int i, int j, int num_samples)
+{
+    std::vector<std::shared_ptr<Ray>> samples;
+    for (int s = 0; s < num_samples; ++s)
+    {
+        samples.push_back(std::make_shared<Ray>(sample_ray_from_pixel(i, j)));
+    }
+    return samples;
 }
