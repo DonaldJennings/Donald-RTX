@@ -55,7 +55,6 @@ void Camera::render(World& world, RenderMode& render_mode)
     std::vector<GeoVec> pixel_colours(width * height);
 
     std::clog << "Rendering " << width << "x" << height << " image" << std::endl;
-    std::clog << "Using " << render_mode.get_name() << " render mode" << std::endl;
     auto render_row = [&](int j) {
         for (int i = 0; i < width; ++i)
         {
@@ -63,7 +62,6 @@ void Camera::render(World& world, RenderMode& render_mode)
 
             if (render_mode.get_name() == "pathtrace")
             {
-                int num_samples = 16;
                 auto samples = get_pixel_samples(i, j, num_samples);
                 for (auto& ray : samples)
                 {

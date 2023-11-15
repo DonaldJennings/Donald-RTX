@@ -4,7 +4,10 @@
 #include "utils.h"
 class BlinnPhong : public RenderMode {
 public:
-    BlinnPhong() {}
+    BlinnPhong() 
+    {
+        name = "BlinnPhong";
+    }
     virtual ~BlinnPhong() {}
 
     GeoVec compute_colour(Ray& ray, World& world, int depth) const override
@@ -27,7 +30,7 @@ public:
 
         GeoVec diffuse_color = compute_diffuse_color(hitRecord, world);
         GeoVec specular_color = compute_specular_color(hitRecord, world, ray);
-        GeoVec ambient_color = compute_ambient_color(hitRecord, world);
+        GeoVec ambient_color = compute_ambient_color(hitRecord);
 
         if (hitRecord.material->isReflective)
         {
@@ -59,8 +62,17 @@ public:
                 HitRecord shadow_hit_record;
                 if (!world.hit(shadow_ray, Interval(0.001,  (light->position() - hitRecord.point).length()), shadow_hit_record))
                 {
+                    GeoVec material_color = hitRecord.material->diffuseColor;
+                    if (hitRecord.material->texture != nullptr)
+                    {
+                        if (hitRecord.shape != nullptr)
+                        {
+                            std::pair<double, double> uv = hitRecord.shape->compute_uv(hitRecord);
+                            material_color = hitRecord.material->texture->sample(uv.first, uv.second);
+                        }
+                    }
                     // Compute the color at the intersection point using the Blinn-Phong shading model
-                    diffuse_color += diffuse(L, N, hitRecord.material->diffuseColor, hitRecord.material->kd) * light->intensity();
+                    diffuse_color += diffuse(L, N, material_color, hitRecord.material->kd) * light->intensity();
                 }
             }
             return diffuse_color;
@@ -86,9 +98,18 @@ public:
             return specular_color;
         }
 
-        GeoVec compute_ambient_color(const HitRecord& hitRecord, const World& world) const
+        GeoVec compute_ambient_color(const HitRecord& hitRecord) const
         {
-            return hitRecord.material->diffuseColor * 0.1;
+            GeoVec ambient =  hitRecord.material->diffuseColor;
+            if(hitRecord.material->texture != nullptr)
+            {
+                if(hitRecord.shape != nullptr)
+                {
+                    std::pair<double, double> uv = hitRecord.shape->compute_uv(hitRecord);
+                    ambient = hitRecord.material->texture->sample(uv.first, uv.second);
+                }
+            }
+            return ambient * 0.01;
         }
 
         GeoVec compute_reflected_color(HitRecord& hitRecord, World& world, Ray& ray, int depth) const

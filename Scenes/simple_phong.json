@@ -37,7 +37,8 @@
                             "isreflective":false,
                             "reflectivity":1.0,
                             "isrefractive":false,
-                            "refractiveindex":1.0 
+                            "refractiveindex":1.0,
+                            "texture":"../Textures/blue_scratch.ppm"
                         } 
                 },
                 {

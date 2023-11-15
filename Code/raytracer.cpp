@@ -14,7 +14,6 @@
 #include "Material.h"
 #include "Pathtrace.h"
 #include "Texture.h"
-#include "TexturedBlinnPhong.h"
 #include <iostream>
 #include <fstream>
 
@@ -118,7 +117,7 @@ Material parse_material(json& mat_json)
 	}
 	return Material(ks, kd, specularexponent, diffusecolor, specularcolor, isreflective, reflectivity, isrefractive, refractiveindex, roughness, fresnel);
 }
-void setup_camera(Camera& camera, json& parsed_camera, int num_bounces)
+void setup_camera(Camera& camera, json& parsed_camera, int num_bounces, int num_samples)
 {
 	camera.setFOV(parsed_camera["fov"]);
 	camera.set_width(parsed_camera["width"]);
@@ -128,8 +127,8 @@ void setup_camera(Camera& camera, json& parsed_camera, int num_bounces)
 	// std::clog << "Setting number of bounces to " << num_bounces << std::endl;
 
 	camera.set_num_bounces(num_bounces);
+	camera.set_num_samples(num_samples);
 
-	std::clog << "Camera settings setup complete" << std::endl;
 	camera.go_to(GeoVec(parsed_camera["position"][0], parsed_camera["position"][1], parsed_camera["position"][2]));
 	camera.look_at(GeoVec(parsed_camera["lookAt"][0], parsed_camera["lookAt"][1], parsed_camera["lookAt"][2]));
 	camera.set_up(GeoVec(parsed_camera["upVector"][0], parsed_camera["upVector"][1], parsed_camera["upVector"][2]));
@@ -140,9 +139,13 @@ void setup_camera(Camera& camera, json& parsed_camera, int num_bounces)
 
 
 
-int main()
+int main(int argc, char** argv)
 {
-	json parsed_scene = parseScene("../Scenes/pathtrace_scene.json");
+
+	// Get first argument and store as scene file directory
+	std::string scene_file_dir = argv[1];
+	std::clog << "Scene file: " << scene_file_dir << std::endl;
+	json parsed_scene = parseScene(scene_file_dir.c_str());
 
 	Camera camera;
 	BinaryRender binary_render;
@@ -180,9 +183,16 @@ int main()
 		std::clog << "Number of bounces set to " << num_bounces << std::endl;
 	}
 
+	// extract nsamples from parsed scene
+	int num_samples = 5;
+	if (parsed_scene.find("nsamples") != parsed_scene.end())
+	{
+		num_samples = parsed_scene["nsamples"].get<int>();
+		std::clog << "Number of samples set to " << num_samples << std::endl;
+	}
+
 	Pathtrace pathtrace;
-	TexturedBlinnPhong textured_blinn_phong;
-	setup_camera(camera, parsed_scene["camera"], num_bounces);
+	setup_camera(camera, parsed_scene["camera"], num_bounces, num_samples);
 
 	std::clog << "Constructing BVH" << std::endl;
 
@@ -192,8 +202,29 @@ int main()
 	{
 		add_world_lights(world_bvh, parsed_scene);
 	}
+	std::clog << "Added world lights" << std::endl;
 	world_bvh.backgroundColour = GeoVec(parsed_scene["scene"]["backgroundcolor"][0], parsed_scene["scene"]["backgroundcolor"][1], parsed_scene["scene"]["backgroundcolor"][2]);
 
 	std::clog << "BVH constructed" << std::endl;
-	camera.render(world_bvh, textured_blinn_phong);
+
+	// Determine render mode from parsed scene
+	if (parsed_scene["rendermode"] == "binary")
+	{
+		std::clog << "Binary render mode selected" << std::endl;
+		camera.render(world_bvh, binary_render);
+	}
+	else if (parsed_scene["rendermode"] == "pathtrace")
+	{
+		std::clog << "Pathtrace render mode selected" << std::endl;
+		camera.render(world_bvh, pathtrace);
+	}
+	else if (parsed_scene["rendermode"] == "phong")
+	{
+		std::clog << "Blinn Phong render mode selected" << std::endl;
+		camera.render(world_bvh, blinn_phong);
+	}
+	else
+	{
+		std::cerr << "Render mode not recognised" << std::endl;
+	}
 }

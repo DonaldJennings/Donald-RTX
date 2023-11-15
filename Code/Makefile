@@ -14,7 +14,6 @@ OBJS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SRCS))
 # Define target executable
 TARGET = raytracer
 
-# Default target
 all: $(TARGET)
 
 # Rule to create object files

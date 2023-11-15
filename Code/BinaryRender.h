@@ -4,7 +4,10 @@
 
 class BinaryRender : public RenderMode {
 public:
-    BinaryRender() {}
+    BinaryRender()
+    {
+        name = "BinaryRender";
+    }
 
     virtual GeoVec compute_colour(Ray& r, World& world, int depth) const override {
         HitRecord rec;

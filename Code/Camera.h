@@ -19,6 +19,7 @@ class Camera
 		void set_height(int height) { this->height = height; };
 		void set_exposure(double exposure) { this->exposure = exposure; };
 		void set_num_bounces(int num_bounces) { this->num_bounces = num_bounces; };
+		void set_num_samples(int num_samples) { this->num_samples = num_samples; };
 		void go_to(GeoVec camera_pos) { this->camera_pos = camera_pos; };
 		void setFOV(double fov) { this->fov = fov; };
 		void look_at(GeoVec look_at) { this->look_at_vec = look_at; };
@@ -51,6 +52,9 @@ class Camera
 		int height;
 		double viewport_height;
 		double viewport_width;
+
+		// Pathtace settings
+		int num_samples;
 
 		Ray ray_from_pixel(int i, int j);
 		Ray sample_ray_from_pixel(int i, int j);
