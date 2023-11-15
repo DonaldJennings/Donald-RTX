@@ -54,7 +54,6 @@ class Camera
 
 		Ray ray_from_pixel(int i, int j);
 		Ray sample_ray_from_pixel(int i, int j);
-		void render_row(World& world, RenderMode& render_mode, int row, int width, std::vector<GeoVec>& pixel_colours);
 		void refresh_viewport_settings();
 		std::vector<std::shared_ptr<Ray>> get_pixel_samples(int i, int j, int num_samples);
 };

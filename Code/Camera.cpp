@@ -6,18 +6,11 @@
 #include<thread>
 #include<chrono>
 #include<random>
+#include"utils.h"
 #include<algorithm>
 
 
 double pi = 3.14159265358979323846;
-
-
-double random_double() 
-{
-    static thread_local std::mt19937 generator(std::random_device{}());
-    std::uniform_real_distribution<double> distribution(0.0, 1.0);
-    return distribution(generator);
-}
 
 Camera::Camera() 
 {
@@ -62,16 +55,15 @@ void Camera::render(World& world, RenderMode& render_mode)
     std::vector<GeoVec> pixel_colours(width * height);
 
     std::clog << "Rendering " << width << "x" << height << " image" << std::endl;
-
+    std::clog << "Using " << render_mode.get_name() << " render mode" << std::endl;
     auto render_row = [&](int j) {
         for (int i = 0; i < width; ++i)
         {
             GeoVec pixel_color(0, 0, 0);
 
-            // if render mode is pathtrace then sample multiple rays per pixel
             if (render_mode.get_name() == "pathtrace")
             {
-                int num_samples = 10;
+                int num_samples = 16;
                 auto samples = get_pixel_samples(i, j, num_samples);
                 for (auto& ray : samples)
                 {

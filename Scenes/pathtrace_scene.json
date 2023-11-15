@@ -1,5 +1,5 @@
 {
-    "nbounces":10, 
+    "nbounces":8, 
     "rendermode":"blinnphong",
     "camera":
         { 
@@ -14,11 +14,11 @@
         },
     "scene":
         { 
-            "backgroundcolor": [0.0, 0.2, 0.5], 
+            "backgroundcolor": [0.0, 0.2, 1], 
             "lightsources":[ 
                 { 
                     "type":"pointlight", 
-                    "position":[0.0, 2.0, 0.5], 
+                    "position":[0.0, 1.0, 0.5], 
                     "intensity":[0.5, 0.5, 0.5] 
                 },
                 { 
@@ -38,7 +38,7 @@
                         "ks":0.3, 
                         "kd":0.9, 
                         "specularexponent":2, 
-                        "diffusecolor":[0.2, 0.5, 0.8],
+                        "diffusecolor":[0.3, 0.8, 0.5],
                         "specularcolor":[1.0,1.0,1.0],
                         "isreflective":false,
                         "reflectivity":1.0,
@@ -56,7 +56,7 @@
                         "ks":0.3, 
                         "kd":0.9, 
                         "specularexponent":2, 
-                        "diffusecolor":[0.2, 0.5, 0.8],
+                        "diffusecolor":[0.3, 0.8, 0.5],
                         "specularcolor":[1.0,1.0,1.0],
                         "isreflective":false,
                         "reflectivity":1.0,
@@ -66,7 +66,7 @@
                 },
                 { 
                     "type":"sphere", 
-                    "center": [0.0, 0.69, 2.25],
+                    "center": [0.0, 0.7, 2.25],
                     "radius":0.7, 
                     "material":
                         { 
@@ -84,7 +84,7 @@
                 },
                 { 
                     "type":"sphere", 
-                    "center": [-1.5, 0.49, 2],
+                    "center": [-1.5, 0.5, 2],
                     "radius":0.5, 
                     "material":
                         { 
@@ -93,17 +93,17 @@
                             "specularexponent":20, 
                             "diffusecolor":[1.0, 0.2, 0.2],
                             "specularcolor":[1.0, 0.6,0.6],
-                            "isreflective":true,
+                            "isreflective":false,
                             "reflectivity":1.0,
-                            "isrefractive":false,
-                            "refractiveindex":1.0,
+                            "isrefractive":true,
+                            "refractiveindex":1.9,
                             "texture" : "red_marble.ppm"
                         } 
                 },
                 
                 { 
                     "type":"sphere", 
-                    "center": [1.5, 0.49, 2],
+                    "center": [1.5, 0.5, 2],
                     "radius":0.5, 
                     "material":
                         { 
@@ -123,7 +123,7 @@
 
                 { 
                     "type":"sphere", 
-                    "center": [-0.8, 0.29, 0.8],
+                    "center": [-0.8, 0.2, 0.8],
                     "radius":0.2, 
                     "material":
                         { 
@@ -140,7 +140,7 @@
                 },
                 { 
                     "type":"sphere", 
-                    "center": [-0.4, 0.29, 0.8],
+                    "center": [-0.4, 0.2, 0.8],
                     "radius":0.2, 
                     "material":
                         { 
@@ -151,48 +151,30 @@
                             "specularcolor":[1.0,1.0,1.0],
                             "isreflective":false,
                             "reflectivity":1.0,
-                            "isrefractive":false,
-                            "refractiveindex":1.0
+                            "isrefractive":true,
+                            "refractiveindex":1.9
                         } 
                 },
                 { 
                     "type":"sphere", 
-                    "center": [0, 0.29, 0.8],
+                    "center": [0, 0.2, 0.8],
                     "radius":0.2, 
                     "material":
                         { 
                             "ks":0.1, 
                             "kd":0.9, 
                             "specularexponent":20, 
-                            "diffusecolor":[0.0, 1.0, 0.0],
+                            "diffusecolor":[0.5, 0.5, 0.5],
                             "specularcolor":[1.0,1.0,1.0],
                             "isreflective":false,
                             "reflectivity":1.0,
                             "isrefractive":false,
-                            "refractiveindex":1.0
+                            "refractiveindex":1.5
                         } 
                 },
                 { 
                     "type":"sphere", 
-                    "center": [0, -0.09, 0],
-                    "radius":0.15, 
-                    "material":
-                        { 
-                            "ks":0.1, 
-                            "kd":0.9, 
-                            "specularexponent":20, 
-                            "diffusecolor":[0.8, 0.5, 0.5],
-                            "specularcolor":[1.0,1.0,1.0],
-                            "isreflective":true,
-                            "reflectivity":1.0,
-                            "isrefractive":false,
-                            "refractiveindex":1.0,
-                            "texture" : "red_marble.ppm"
-                        } 
-                },
-                { 
-                    "type":"sphere", 
-                    "center": [0.4, 0.19, 0.75],
+                    "center": [0.4, 0.1, 0.75],
                     "radius":0.1, 
                     "material":
                         { 
@@ -210,7 +192,7 @@
                 },
                 { 
                     "type":"sphere", 
-                    "center": [0.6, 0.29, 1.5],
+                    "center": [0.6, 0.2, 1.5],
                     "radius":0.2, 
                     "material":
                         { 

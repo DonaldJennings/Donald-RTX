@@ -1,6 +1,7 @@
 
 #include "RenderMode.h"
 #include <iostream>
+#include "utils.h"
 class BlinnPhong : public RenderMode {
 public:
     BlinnPhong() {}
@@ -16,7 +17,6 @@ public:
         // If we've exceed the ray bounce limit or we don't hit anything, return the background colour
         if (depth <= 0)
         {
-            std::clog << "Depth limit reached" << std::endl;
             return world.backgroundColour;
         }
 
@@ -77,7 +77,7 @@ public:
 
                 Ray shadow_ray(hitRecord.point, L);
                 HitRecord shadow_hit_record;
-                if (!world.hit(shadow_ray, Interval(0.0, (light->position() - hitRecord.point).length()), shadow_hit_record))
+                if (!world.hit(shadow_ray, Interval(0.001, (light->position() - hitRecord.point).length()), shadow_hit_record))
                 {
                     // Compute the color at the intersection point using the Blinn-Phong shading model
                     specular_color += specular(L, N, V, hitRecord.material->specularColor, hitRecord.material->ks, hitRecord.material->specularExponent) * light->intensity();
@@ -88,7 +88,7 @@ public:
 
         GeoVec compute_ambient_color(const HitRecord& hitRecord, const World& world) const
         {
-            return hitRecord.material->diffuseColor * world.backgroundColour * 1.0;
+            return hitRecord.material->diffuseColor * 0.1;
         }
 
         GeoVec compute_reflected_color(HitRecord& hitRecord, World& world, Ray& ray, int depth) const
@@ -105,9 +105,19 @@ public:
         {
             GeoVec refracted_color = GeoVec(0, 0, 0);
             double refractive_index = hitRecord.material->refractiveIndex;
-            GeoVec refracted;
-            if (refract(ray.direction, hitRecord.normal, refractive_index, refracted))
-            {
+            GeoVec refracted = refract(ray.direction, hitRecord.normal, refractive_index);
+
+            // Compute Fresnel reflectance
+            double cos_theta_i = dot(-ray.direction, hitRecord.normal);
+            double fresnel_reflectance = schlick(cos_theta_i, refractive_index);
+
+            if (random_double() < fresnel_reflectance) {
+                // Reflect
+                GeoVec reflected = reflect(ray.direction, hitRecord.normal);
+                Ray reflected_ray(hitRecord.point, reflected);
+                refracted_color = compute_colour(reflected_ray, world, depth - 1);
+            } else {
+                // Refract
                 Ray refracted_ray(hitRecord.point, refracted);
                 refracted_color = compute_colour(refracted_ray, world, depth - 1);
             }
@@ -125,6 +135,13 @@ public:
             GeoVec halfway_dir = normalize(light_dir + view_dir);
             float specular_factor = std::pow(std::max(0.0, dot(normal, halfway_dir)), shininess);
             return color * specular_factor;
+        }
+
+        double schlick(double cos_theta_i, double refractive_index) const
+        {
+            double r0 = (1.0 - refractive_index) / (1.0 + refractive_index);
+            r0 = r0 * r0;
+            return r0 + (1.0 - r0) * std::pow((1.0 - cos_theta_i), 5.0);
         }
 
 protected:

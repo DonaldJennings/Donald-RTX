@@ -3,6 +3,7 @@
 #include "Sphere.h"
 #include "nlohmann/json.hpp"
 #include "Ray.h"
+#include "utils.h"
 #include "RenderMode.h"
 #include "Cylinder.h"
 #include "GeoVec.h"
@@ -155,17 +156,14 @@ int main()
 		if (shape["type"] == "sphere")
 		{
 			add_hittable_sphere(hittables, shape, material_obj);
-			std::clog << "Sphere added" << std::endl;
 		}
 		else if (shape["type"] == "cylinder")
 		{
 			add_hittable_cylinder(hittables, shape, material_obj);
-			std::clog << "Cylinder added" << std::endl;
 		}
 		else if (shape["type"] == "triangle")
 		{
 			add_hittable_triangle(hittables, shape, material_obj);
-			std::clog << "Triangle added" << std::endl;
 		}
 		else
 		{
@@ -197,5 +195,5 @@ int main()
 	world_bvh.backgroundColour = GeoVec(parsed_scene["scene"]["backgroundcolor"][0], parsed_scene["scene"]["backgroundcolor"][1], parsed_scene["scene"]["backgroundcolor"][2]);
 
 	std::clog << "BVH constructed" << std::endl;
-	camera.render(world_bvh, pathtrace);
+	camera.render(world_bvh, textured_blinn_phong);
 }

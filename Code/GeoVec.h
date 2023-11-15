@@ -138,17 +138,12 @@ inline GeoVec reflect(const GeoVec& v, const GeoVec& n)
     return v - 2 * dot(v, n) * n;
 }
 
-inline bool refract(const GeoVec& v, const GeoVec& n, double ni_over_nt, GeoVec& refracted)
+inline GeoVec refract(const GeoVec& v, const GeoVec& n, double incident)
 {
-    GeoVec uv = normalize(v);
-    double dt = dot(uv, n);
-    double discriminant = 1.0 - ni_over_nt * ni_over_nt * (1 - dt * dt);
-    if (discriminant > 0)
-    {
-        refracted = ni_over_nt * (uv - n * dt) - n * sqrt(discriminant);
-        return true;
-    }
-    return false;
+    auto cos_theta = fmin(dot(-v, n), 1.0);
+    auto r_out_perp =  incident * (v + cos_theta*n);
+    auto r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.length_squared())) * n;
+    return r_out_perp + r_out_parallel;
 }
 
 

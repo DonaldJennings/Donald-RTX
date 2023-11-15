@@ -2,54 +2,66 @@
 #include "HitRecord.h"
 #include "Ray.h"
 #include "GeoVec.h"
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
+#include "utils.h"
 class Pathtrace : public RenderMode
 {
 public:
-    Pathtrace() {}
+    Pathtrace()
+    {
+        name = "pathtrace";
+    }
+
     virtual ~Pathtrace() {}
 
     GeoVec compute_colour(Ray& ray, World& world, int depth) const override
     {
+        if (depth <= 0)
+            return GeoVec(0, 0, 0);
+        
         HitRecord hitRecord;
-        if (depth <= 0 || !world.hit(ray, Interval(0.001, std::numeric_limits<double>::infinity()), hitRecord))
-        {
-            // std::clog << "Depth limit reached" << std::endl;
-            // Gradient blue sky
-            GeoVec unit_direction = normalize(ray.direction);
-            double t = 0.5 * (unit_direction.y - 1.0);
-            return (1.0 - t) * GeoVec(1.0, 1.0, 1.0) + t * world.backgroundColour;
-        }
-
+    if (world.hit(ray, Interval(0.001, std::numeric_limits<double>::max()), hitRecord))
+    {
         Ray scattered;
         GeoVec attenuation;
-
-        scatter(ray, hitRecord, scattered, attenuation);
-        GeoVec shadow(0, 0, 0);
-        GeoVec colour(0, 0, 0);
-        for (auto& light : world.lights)
+        if (scatter(ray, hitRecord, scattered, attenuation))
         {
-            int num_samples = 5; // Number of samples for soft shadows
-            GeoVec soft_shadow(0, 0, 0);
-            for (int i = 0; i < num_samples; i++)
+            GeoVec final_colour(0, 0, 0);
+            GeoVec scattered_color = compute_colour(scattered, world, depth - 1);
+            for (auto& light : world.lights)
             {
-                // Sample a point on the light source
-                GeoVec light_sample = light->sample();
-                Ray shadow_ray(hitRecord.point, normalize(light_sample - hitRecord.point));
-                HitRecord shadow_hit_record;
-                if (!world.hit(shadow_ray, Interval(0.001, (light_sample - hitRecord.point).length()), shadow_hit_record))
-                {   
-                    soft_shadow += light->intensity();
+                int num_samples = 5; // Number of samples for soft shadows
+                GeoVec soft_shadow(0, 0, 0);
+                for (int i = 0; i < num_samples; i++)
+                {
+                    // Sample a point on the light source
+                    GeoVec light_sample = light->sample();
+                    Ray shadow_ray(hitRecord.point, normalize(light_sample - hitRecord.point));
+                    HitRecord shadow_hit_record;
+                    if (!world.hit(shadow_ray, Interval(0.001, (light_sample - hitRecord.point).length()), shadow_hit_record))
+                    {   
+                        GeoVec adjusted_reflection;
+                        if (hitRecord.material->isReflective)
+                        {
+                            adjusted_reflection = attenuation;
+                        }
+                        else
+                        {
+                            adjusted_reflection = hitRecord.material->diffuseColor * attenuation;
+                        }
+                        soft_shadow += light->intensity() * adjusted_reflection * scattered_color;
+                    }
                 }
+                final_colour += soft_shadow / num_samples;
             }
-            shadow += soft_shadow / num_samples;
-            colour += shadow * attenuation * compute_colour(scattered, world, depth - 1);
+            return final_colour;
         }
-        return colour;
+    }
+    
+    // Gradient blue sky
+    GeoVec unit_direction = normalize(ray.direction);
+    double t = 0.5 * (unit_direction.y - 1.0);
+    return (1.0 - t) * GeoVec(1.0, 1.0, 1.0) + t * world.backgroundColour;
+
     }
 
 private:
@@ -73,47 +85,30 @@ private:
 
     bool refractive_brdf(const Ray& ray, const HitRecord& hitRecord, Ray& scattered, GeoVec& attenuation) const
     {
-        GeoVec outward_normal;
-        double refractive_index;
-        double reflect_prob;
-        double cosine;
+        attenuation = hitRecord.material->specularColor;
+        double refraction_ratio = hitRecord.front_face ? (1.0/hitRecord.material->refractiveIndex) : hitRecord.material->refractiveIndex;
 
-        if (dot(ray.direction, hitRecord.normal) > 0)
-        {
-            outward_normal = -hitRecord.normal;
-            refractive_index = hitRecord.material->refractiveIndex;
-            cosine = refractive_index * dot(ray.direction, hitRecord.normal) / ray.direction.length();
-        }
+        
+        double cos_theta = fmin(dot(-normalize(ray.direction), hitRecord.normal), 1.0);
+        double sin_theta = sqrt(1.0 - cos_theta*cos_theta);
+
+        bool cannot_refract = refraction_ratio * sin_theta > 1.0;
+        GeoVec direction;
+
+        auto r0 = (1 - refraction_ratio) / (1 + refraction_ratio);
+        r0 = r0 * r0;
+        auto reflect_prob = r0 + (1 - r0) * pow((1 - cos_theta), 5);
+
+        if (cannot_refract || reflect_prob > random_double())
+            direction = reflect(normalize(ray.direction), hitRecord.normal);
         else
-        {
-            outward_normal = hitRecord.normal;
-            refractive_index = 1.0 / hitRecord.material->refractiveIndex;
-            cosine = -dot(ray.direction, hitRecord.normal) / ray.direction.length();
-        }
+            direction = refract(normalize(ray.direction), hitRecord.normal, refraction_ratio);
 
-        GeoVec refracted;
-        if (refract(ray.direction, outward_normal, refractive_index, refracted))
-        {
-            reflect_prob = reflectance(normalize(ray.direction), hitRecord.normal, refractive_index);
-        }
-        else
-        {
-            reflect_prob = 1.0;
-        }
-
-        if (random_double() < reflect_prob)
-        {
-            GeoVec reflected = reflect(normalize(ray.direction), normalize(hitRecord.normal));
-            scattered = Ray(hitRecord.point, normalize(reflected));
-        }
-        else
-        {
-            scattered = Ray(hitRecord.point, normalize(refracted));
-        }
-
+        scattered = Ray(hitRecord.point, direction);
         return true;
     }
-
+    
+    
     bool cook_torrance_brdf(const Ray& ray, const HitRecord& hitRecord, Ray& scattered, GeoVec& attenuation) const
     {
         // implement cook torrance 
@@ -159,13 +154,6 @@ private:
             p = 2.0 * GeoVec(random_double(), random_double(), random_double()) - GeoVec(1, 1, 1);
         } while (p.length_squared() >= 1.0);
         return p;
-    }
-
-    double random_double() const
-    {
-        static thread_local std::mt19937 generator(std::random_device{}());
-        std::uniform_real_distribution<double> distribution(0.0, 1.0);
-        return distribution(generator);
     }
 
     double reflectance(const GeoVec& direction, const GeoVec& normal, double refractiveIndex) const {

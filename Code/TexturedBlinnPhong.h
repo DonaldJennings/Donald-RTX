@@ -115,12 +115,23 @@ public:
         {
             GeoVec refracted_color = GeoVec(0, 0, 0);
             double refractive_index = hitRecord.material->refractiveIndex;
-            GeoVec refracted;
-            if (refract(ray.direction, hitRecord.normal, refractive_index, refracted))
-            {
+            GeoVec refracted = refract(ray.direction, hitRecord.normal, refractive_index);
+
+            // Compute Fresnel reflectance
+            double cos_theta_i = dot(-ray.direction, hitRecord.normal);
+            double fresnel_reflectance = schlick(cos_theta_i, refractive_index);
+
+            if (random_double() < fresnel_reflectance) {
+                // Reflect
+                GeoVec reflected = reflect(ray.direction, hitRecord.normal);
+                Ray reflected_ray(hitRecord.point, reflected);
+                refracted_color = compute_colour(reflected_ray, world, depth - 1);
+            } else {
+                // Refract
                 Ray refracted_ray(hitRecord.point, refracted);
                 refracted_color = compute_colour(refracted_ray, world, depth - 1);
             }
+
             return refracted_color;
         }
 
@@ -137,6 +148,13 @@ public:
             return color * specular_factor * intensity;
         }
 
+        double schlick(double cos_theta_i, double refractive_index) const
+        {
+            double r0 = (1 - refractive_index) / (1 + refractive_index);
+            r0 = r0 * r0;
+            return r0 + (1 - r0) * std::pow((1 - cos_theta_i), 5);
+        }
+        
 protected:
     std::string name = "TexturedBlinnPhong";
 };

@@ -8,7 +8,7 @@
 class Material {
 public:
     Material() : ks(0.0), kd(0.0), specularExponent(0.0), diffuseColor(0.0, 0.0, 0.0), specularColor(0.0, 0.0, 0.0), 
-                 isReflective(false), reflectivity(0.0), isRefractive(false), refractiveIndex(1.0) {}
+                 isReflective(false), reflectivity(0.0), isRefractive(false), refractiveIndex(0.0) {}
 
     Material(double ks, double kd, double specularExponent, GeoVec diffuseColor, GeoVec specularColor, 
              bool isReflective, double reflectivity, bool isRefractive, double refractiveIndex,
@@ -43,6 +43,6 @@ public:
     std::shared_ptr<Texture> texture;
 
     // PATH TRACING
-    double roughness = 0.0;
-    double fresnel = 0.0;
+    double roughness = 0.5;
+    double fresnel = 0.04;
 };
