@@ -2,6 +2,7 @@ import json
 import os
 import imageio
 import subprocess
+import math
 
 def load_scene_from_file(filename):
     with open(filename, 'r') as file:
@@ -16,14 +17,53 @@ def run_raytracer(input_scene, output_ppm):
     with open(output_ppm, 'w') as file:
         process = subprocess.run(command, stdout=file)
     
+def update_sphere_center_on_bounce(current_center, radius, velocity, dt, gravity=-2.718):
+    new_velocity = velocity + gravity * dt
+    new_center = current_center[1] + new_velocity * dt + 0.5 * gravity * dt**2
+    
+    if new_center - radius < 0:
+        new_center = radius
+        new_velocity *= -0.95
+        
+    return [current_center[0], new_center, current_center[2]], new_velocity
+
+    
 def generate_scenes(scene, output_folder='./video_scenes'):
-    # move the camera up 0.05 units per frame for 100 frames
-    for i in range(50):
-        scene['camera']['position'][1] += 0.01
-        # save the scene to a file named video_test_frame_0000.json
+    # Clear the output folder
+    for f in os.listdir(output_folder):
+        os.remove(os.path.join(output_folder, f))
+    
+    NUM_FRAMES = 288
+    initial_velocity_central = -2.7
+    initial_velocity_red_marble = -3.0
+    initial_velocity_blue_scuffed = -3.2
+    intial_velocity_blue_flat = -2.9
+    
+    # Move Camera around circle at center [0, 0.7, 2.25] by 1 degree each frame
+    for i in range(NUM_FRAMES):
+        angle = i
+        scene['camera']['position'][0] = 0 + 5.25 * math.sin(math.radians(angle))
+        scene['camera']['position'][2] = 2.25 + 5.25 * math.cos(math.radians(angle))
+        
+        central_sphere = scene['scene']['shapes'][0]
+        red_marble_sphere = scene['scene']['shapes'][1]
+        blue_scuffed_sphere = scene['scene']['shapes'][2]
+        blue_flat_sphere = scene['scene']['shapes'][3]
+        
+        dt = 0.1
+        
+        scene['scene']['shapes'][0]['center'], initial_velocity_central = update_sphere_center_on_bounce(central_sphere['center'], central_sphere['radius'], initial_velocity_central, dt)
+        scene['scene']['shapes'][1]['center'], initial_velocity_red_marble = update_sphere_center_on_bounce(red_marble_sphere['center'], red_marble_sphere['radius'], initial_velocity_red_marble, dt)
+        scene['scene']['shapes'][2]['center'], initial_velocity_blue_scuffed = update_sphere_center_on_bounce(blue_scuffed_sphere['center'], blue_scuffed_sphere['radius'], initial_velocity_blue_scuffed, dt)
+        scene['scene']['shapes'][3]['center'], intial_velocity_blue_flat = update_sphere_center_on_bounce(blue_flat_sphere['center'], blue_flat_sphere['radius'], intial_velocity_blue_flat, dt)
+        
+        scene['camera']['lookAt'][0] = scene['scene']['shapes'][0]['center'][0]
+        scene['camera']['lookAt'][1] = scene['scene']['shapes'][0]['center'][1]
+        scene['camera']['lookAt'][2] = scene['scene']['shapes'][0]['center'][2]
+        
         with open(output_folder + 'video_test_frame_{:04d}.json'.format(i), 'w') as file:
             json.dump(scene, file)
-
+            
 def convert_ppm_to_mp4(input_folder, output_mp4):
     ppm_files = [f for f in os.listdir(input_folder) if f.endswith(".ppm")]
 

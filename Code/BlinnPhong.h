@@ -36,7 +36,7 @@ public:
         {
             reflected_color = compute_reflected_color(hitRecord, world, ray, depth);
             diffuse_color = (1 - hitRecord.material->reflectivity) * diffuse_color;
-        specular_color = (1 - hitRecord.material->reflectivity) * specular_color;
+            specular_color = (1 - hitRecord.material->reflectivity) * specular_color;
         }
 
         if (hitRecord.material->isRefractive)
@@ -109,7 +109,7 @@ public:
                     ambient = hitRecord.material->texture->sample(uv.first, uv.second);
                 }
             }
-            return ambient * 0.01;
+            return ambient * 0.05;
         }
 
         GeoVec compute_reflected_color(HitRecord& hitRecord, World& world, Ray& ray, int depth) const

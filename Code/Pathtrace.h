@@ -21,34 +21,48 @@ public:
         }
         
         HitRecord hitRecord;
-        if (world.hit(ray, Interval(0.001, std::numeric_limits<double>::max()), hitRecord))
+        if (!world.hit(ray, Interval(0.001, std::numeric_limits<double>::max()), hitRecord))
         {
-            Ray scattered;
-            GeoVec attenuation;
-            if (scatter(ray, hitRecord, scattered, attenuation))
-            {
-                GeoVec final_colour;
-                for (auto& light : world.lights)
-                {
-                    int num_samples = 3; // Number of samples for soft shadows
-                    GeoVec soft_shadow(0, 0, 0);
-                    for (int i = 0; i < num_samples; i++)
-                    {
-                        // Sample a point on the light source
-                        GeoVec light_sample = light->sample();
-                        Ray shadow_ray(hitRecord.point, normalize(light_sample - hitRecord.point));
-                        HitRecord shadow_hit_record;
-                        if (!world.hit(shadow_ray, Interval(0.001, (light_sample - hitRecord.point).length()), shadow_hit_record))
-                        {   
-                            soft_shadow += light->intensity() * attenuation * compute_colour(scattered, world, depth - 1) / (light_sample - hitRecord.point).length();
-                        }
-                    }
-                    final_colour += soft_shadow / num_samples;
-                }
-                return final_colour;
-            }
+            double t = 0.5 * (normalize(ray.direction).y + 1.0);
+            t = t * t * (3.0 - 2.0 * t); // Smoothstep
+            GeoVec zenithColor(0.5, 0.7, 1.5); // Deep blue at the zenith
+            GeoVec horizonColor(0.8, 0.9, 1.0); // Lighter color at the horizon
+            return (1.0 - t) * horizonColor + t * zenithColor; // Interpolate between the two colors based on the y-coordinate of the ray direction
         }
-        return world.backgroundColour;
+
+        Ray scattered;
+        GeoVec attenuation;
+        if (scatter(ray, hitRecord, scattered, attenuation))
+        {
+            GeoVec final_colour;
+            for (auto& light : world.lights)
+            {
+                int num_samples = 5; // Number of samples for soft shadows
+                GeoVec soft_shadow(0, 0, 0);
+                for (int i = 0; i < num_samples; i++)
+                {
+                    // Sample a point on the light source
+                    GeoVec light_sample = light->sample();
+                    GeoVec to_light = normalize(light_sample - hitRecord.point);
+                    Ray shadow_ray(hitRecord.point, normalize(light_sample - hitRecord.point));
+                    HitRecord shadow_hit_record;
+                    if (!world.hit(shadow_ray, Interval(0.001, (light_sample - hitRecord.point).length()), shadow_hit_record))
+                    {   
+                        // If the shadow ray doesn't hit anything, add the light's contribution
+                        double cos_theta = fmax(dot(to_light, hitRecord.normal), 0.0);
+                        soft_shadow += light->intensity() * cos_theta * attenuation;
+
+                    }
+                }
+                soft_shadow = soft_shadow / num_samples;
+                final_colour += soft_shadow;
+            }
+            return final_colour + compute_colour(scattered, world, depth - 1) * attenuation; 
+        }
+        else
+        {
+            return GeoVec(0, 0, 0);
+        }
     }
 
 private:
@@ -167,7 +181,7 @@ private:
         auto uv = hitRecord.shape->compute_uv(hitRecord);
         GeoVec texture_color = hitRecord.material->texture->sample(uv.first, uv.second);
 
-        attenuation = hitRecord.material->diffuseColor * texture_color;
+        attenuation = texture_color / M_PI;
         return true;
     }
 };
