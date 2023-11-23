@@ -124,25 +124,33 @@ public:
 
         GeoVec compute_refracted_color(HitRecord& hitRecord, World& world, Ray& ray, int depth) const
         {
-            GeoVec refracted_color = GeoVec(0, 0, 0);
-            double refractive_index = hitRecord.material->refractiveIndex;
-            GeoVec refracted = refract(ray.direction, hitRecord.normal, refractive_index);
-
-            // Compute Fresnel reflectance
-            double cos_theta_i = dot(-ray.direction, hitRecord.normal);
-            double fresnel_reflectance = schlick(cos_theta_i, refractive_index);
-
-            if (random_double() < fresnel_reflectance) {
-                // Reflect
-                GeoVec reflected = reflect(ray.direction, hitRecord.normal);
-                Ray reflected_ray(hitRecord.point, reflected);
-                refracted_color = compute_colour(reflected_ray, world, depth - 1);
-            } else {
-                // Refract
-                Ray refracted_ray(hitRecord.point, refracted);
-                refracted_color = compute_colour(refracted_ray, world, depth - 1);
+            GeoVec refracted;
+            GeoVec outward_normal;
+            double ni_over_nt;
+            double cosine;
+            if (dot(ray.direction, hitRecord.normal) > 0)
+            {
+                outward_normal = -hitRecord.normal;
+                ni_over_nt = hitRecord.material->refractiveIndex;
+                cosine = hitRecord.material->refractiveIndex * dot(ray.direction, hitRecord.normal) / ray.direction.length();
             }
-            return refracted_color;
+            else
+            {
+                outward_normal = hitRecord.normal;
+                ni_over_nt = 1.0 / hitRecord.material->refractiveIndex;
+                cosine = -dot(ray.direction, hitRecord.normal) / ray.direction.length();
+            }
+            refracted = refract(ray.direction, outward_normal, ni_over_nt);
+            if (refracted.length() > 0)
+            {
+                auto refracted_ray = Ray(hitRecord.point, refracted);
+                return compute_colour(refracted_ray, world, depth - 1);
+            }
+            else
+            {
+                auto reflected_ray = Ray(hitRecord.point, reflect(ray.direction, hitRecord.normal));
+                return compute_colour(reflected_ray, world, depth - 1);
+            }
         }
 
         GeoVec diffuse(const GeoVec& light_dir, const GeoVec& normal, const GeoVec& color, float intensity) const

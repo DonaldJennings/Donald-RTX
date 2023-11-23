@@ -115,10 +115,22 @@ Ray Camera::ray_from_pixel(int i, int j)
 
 Ray Camera::sample_ray_from_pixel(int i, int j)
 {
+    double aperture = 0.025;
     // Generate a random ray for the pixel (i,j)
     auto pixel_centre = pixel_origin + i*horizontal_pixel_change + j*vertical_pixel_change;
     auto random_point = pixel_centre + random_double()*horizontal_pixel_change + random_double()*vertical_pixel_change;
-    return Ray(camera_pos, normalize(random_point - camera_pos));
+
+    // Generate a random point within the camera's aperture
+    GeoVec random_in_unit_circle = random_in_unit_disk() * aperture;
+
+    // Compute the ray origin and the focus point
+    GeoVec ray_origin = camera_pos + random_in_unit_circle;
+    GeoVec focusPoint = pixel_centre;
+
+    // Compute the ray direction so that it passes through the focus point
+    GeoVec ray_direction = focusPoint - ray_origin;
+
+    return Ray(ray_origin, normalize(ray_direction));
 
 }
 

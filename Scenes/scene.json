@@ -1,5 +1,5 @@
 {
-    "nbounces":10,
+    "nbounces":8,
     "nsamples":16,
     "rendermode":"pathtrace",
     "camera":
@@ -110,8 +110,8 @@
                             "specularcolor":[1.0,1.0,1.0],
                             "isreflective":false,
                             "reflectivity":1.0,
-                            "isrefractive":false,
-                            "refractiveindex":1.0 
+                            "isrefractive":true,
+                            "refractiveindex":1.9
                         } 
                 },
                 { 

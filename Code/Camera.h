@@ -5,6 +5,7 @@
 #include "RenderMode.h"
 #include "GeoVec.h"
 #include "Interval.h"
+#include "utils.h"
 #include <mutex>
 #include <atomic>
 #include <thread>
