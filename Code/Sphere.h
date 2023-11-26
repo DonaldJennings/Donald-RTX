@@ -42,9 +42,11 @@ public:
     std::pair<double, double> compute_uv(const HitRecord& rec) const override
     {
         double theta = acos(-rec.normal.y);
-        double phi = atan2(-rec.normal.z, rec.normal.x) + M_PI;
+        double phi = atan2(-rec.normal.z, rec.normal.x) ;
+        double u = (phi + M_PI) / (2 * M_PI);
+        double v = (theta + M_PI / 2) / M_PI;
 
-        return std::make_pair(1 - phi / (2 * M_PI), 1 - theta / M_PI);
+        return std::make_pair(u, v);
     }
 
     double find_root(Ray& r, Interval ray_interval) const

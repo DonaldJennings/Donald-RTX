@@ -51,6 +51,7 @@ public:
         GeoVec outward_normal = normalize(cross(e1, e2));
         rec.set_face_normal(r, outward_normal);
         rec.material = std::make_shared<Material>(mat);
+        rec.shape = std::make_shared<Triangle>(*this);
 
         return true;
     }
@@ -66,12 +67,26 @@ public:
         double d20 = dot(v0p, v0v1);
         double d21 = dot(v0p, v0v2);
         double denom = d00 * d11 - d01 * d01;
+
         if (denom == 0)
         {
-            std::clog << "Denom is 0" << std::endl;
+            return std::make_pair(0, 0);
         }
+
         double v = (d11 * d20 - d01 * d21) / denom;
-        double u = (d00 * d21 - d01 * d20) / denom;
+        double w = (d00 * d21 - d01 * d20) / denom;
+        double u = 1.0 - v - w;
+
+        // Check if the barycentric coordinates are within the valid range
+        if (u < 0 || u > 1 || v < 0 || v > 1)
+        {
+            std::cerr << "Invalid barycentric coordinates: u=" << u << ", v=" << v << std::endl;
+            return std::make_pair(0, 0);
+        }
+
+        double scaleFactor = 10.0; // Adjust this value to get the desired density
+        u *= scaleFactor;
+        v *= scaleFactor;
         return std::make_pair(u, v);
     }
     

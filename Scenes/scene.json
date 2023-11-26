@@ -1,6 +1,6 @@
 {
     "nbounces":8, 
-    "rendermode":"phong",
+    "rendermode":"pathtrace",
     "camera":
         { 
             "type":"pinhole", 
@@ -48,7 +48,7 @@
                 {
                     "type": "cylinder",
                     "center": [-0.3, 0.19, 1],
-                    "axis": [1, 0, 0],
+                    "axis": [0, 1, 0],
                     "radius": 0.15,
                     "height": 0.2,
                     "material":

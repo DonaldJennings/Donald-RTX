@@ -6,13 +6,13 @@
     "camera":
         { 
             "type":"pinhole", 
-            "width":3840, 
-            "height":2160,
+            "width":1200, 
+            "height":800,
             "position":[0.0, 0.75, -0.25],
             "lookAt":[0.0, 0.35, 1.0],
             "upVector":[0.0, 1.0, 0.0],
-            "fov":45.0,
-            "exposure":0.4,
+            "fov":60.0,
+            "exposure":0.1,
             "aperture":0.025
         },
     "scene":
@@ -26,22 +26,45 @@
                 }
             ], 
             "shapes":[ 
-                { 
-                    "type":"sphere", 
-                    "center": [0, -25.0, 0], 
-                    "radius":25.1, 
+                {
+                    "type": "triangle",
+                    "v0": [-20, 0, -20],
+                    "v1": [20, 0, -20],
+                    "v2": [-20, 0, 20],
                     "material":
-                        { 
-                            "ks":0.1, 
-                            "kd":0.9, 
-                            "specularexponent":10, 
-                            "diffusecolor":[0.5, 1, 0.5],
-                            "specularcolor":[1.0,1.0,1.0],
-                            "isreflective":false,
-                            "reflectivity":1.0,
-                            "isrefractive":false,
-                            "refractiveindex":1.0
-                        } 
+                    { 
+                        "ks":0.3, 
+                        "kd":0.9, 
+                        "specularexponent":2, 
+                        "diffusecolor":[0.3, 1.0, 0.4],
+                        "specularcolor":[0.8,1.0,0.8],
+                        "isreflective":false,
+                        "reflectivity":1.0,
+                        "isrefractive":false,
+                        "refractiveindex":1.0,
+                        "roughness" : 0.1,
+                        "texture": "tough_grass.ppm"
+                    } 
+                },
+                {
+                    "type": "triangle",
+                    "v0": [20, 0, 20],
+                    "v1": [20, 0, -20],
+                    "v2": [-20, 0, 20],
+                    "material":
+                    { 
+                        "ks":0.3, 
+                        "kd":0.9, 
+                        "specularexponent":2, 
+                        "diffusecolor":[0.3, 1.0, 0.4],
+                        "specularcolor":[0.8,1.0,0.8],
+                        "isreflective":false,
+                        "reflectivity":1.0,
+                        "isrefractive":false,
+                        "refractiveindex":1.0,
+                        "roughness" : 0.1,
+                        "texture": "tough_grass.ppm"
+                    } 
                 },
                 {
                     "type": "cylinder",
@@ -60,7 +83,67 @@
                             "reflectivity":1.0,
                             "isrefractive":false,
                             "refractiveindex":1.0,
-                            "texture": "red_marble.ppm"
+                            "texture": "blue_scratch.ppm"
+                        } 
+                },
+                {
+                    "type": "cylinder",
+                    "center": [0.1, 0.3, 4],
+                    "axis": [1, 0, 0],
+                    "radius": 0.3,
+                    "height": 0.5,
+                    "material":
+                        { 
+                            "ks":0.1, 
+                            "kd":0.9, 
+                            "specularexponent":20, 
+                            "diffusecolor":[0.5, 0.5, 0.8],
+                            "specularcolor":[1.0,1.0,1.0],
+                            "isreflective":false,
+                            "reflectivity":1.0,
+                            "isrefractive":false,
+                            "refractiveindex":1.0,
+                            "texture": "wood.ppm"
+                        } 
+                },
+                {
+                    "type": "cylinder",
+                    "center": [-2.0, 1.0, 4],
+                    "axis": [0, 1, 0],
+                    "radius": 0.5,
+                    "height": 1.0,
+                    "material":
+                        { 
+                            "ks":0.1, 
+                            "kd":0.9, 
+                            "specularexponent":20, 
+                            "diffusecolor":[0.5, 0.5, 0.8],
+                            "specularcolor":[1.0,1.0,1.0],
+                            "isreflective":false,
+                            "reflectivity":1.0,
+                            "isrefractive":false,
+                            "refractiveindex":1.0,
+                            "texture": "wood.ppm"
+                        } 
+                },
+                {
+                    "type": "cylinder",
+                    "center": [2.0, 3.0, 8],
+                    "axis": [0, 1, 0],
+                    "radius": 1.5,
+                    "height": 3.0,
+                    "material":
+                        { 
+                            "ks":0.1, 
+                            "kd":0.9, 
+                            "specularexponent":20, 
+                            "diffusecolor":[0.5, 0.5, 0.8],
+                            "specularcolor":[1.0,1.0,1.0],
+                            "isreflective":false,
+                            "reflectivity":1.0,
+                            "isrefractive":false,
+                            "refractiveindex":1.0,
+                            "texture": "wood.ppm"
                         } 
                 },
                 {
@@ -78,7 +161,8 @@
                             "isreflective":true,
                             "reflectivity":1.0,
                             "isrefractive":false,
-                            "refractiveindex":1.0 
+                            "refractiveindex":1.0,
+                            "texture": "red_marble.ppm"
                         } 
                 },
                 {
@@ -118,7 +202,25 @@
                 },
                 { 
                     "type":"sphere", 
-                    "center": [0.3, 0.29, 1],
+                    "center": [-1, 2, 9],
+                    "radius":2.0, 
+                    "material":
+                        { 
+                            "ks":0.1, 
+                            "kd":0.9, 
+                            "specularexponent":20, 
+                            "diffusecolor":[0.8, 0.5, 0.5],
+                            "specularcolor":[1.0,1.0,1.0],
+                            "isreflective":false,
+                            "reflectivity":1.0,
+                            "isrefractive":false,
+                            "refractiveindex":3.0,
+                            "texture": "football.ppm"
+                        } 
+                },
+                { 
+                    "type":"sphere", 
+                    "center": [0.3, 0.2, 1],
                     "radius":0.2, 
                     "material":
                         { 

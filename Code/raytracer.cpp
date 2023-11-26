@@ -63,12 +63,6 @@ void add_hittable_cylinder(std::vector<std::shared_ptr<Hittable>>& shapes, json&
 	GeoVec axis { normalize(GeoVec(parsed_cylinder["axis"][0], parsed_cylinder["axis"][1], parsed_cylinder["axis"][2])) };
 	double radius { parsed_cylinder["radius"].get<double>() };
 	double height { parsed_cylinder["height"].get<double>() };
-	std::clog << "Cylinder Details: " << std::endl;
-	std::clog << "Center: " << center << std::endl;
-	std::clog << "Axis: " << axis << std::endl;
-	std::clog << "Radius: " << radius << std::endl;
-	std::clog << "Height: " << height << std::endl;
-	
 	Cylinder cylinder(center, axis, radius, height);
 	cylinder.set_material(material);
 	shapes.push_back(std::make_shared<Cylinder>(cylinder));
@@ -115,9 +109,8 @@ Material parse_material(json& mat_json)
 	Texture texture;
 	if (mat_json.find("texture") != mat_json.end())
 	{
-		std::clog << "Texture found" << std::endl;
 		Texture texture("../Textures/" + mat_json["texture"].get<std::string>());
-
+		std::clog << "Texture " << mat_json["texture"] << " found" << std::endl;
 		return Material(ks, kd, specularexponent, diffusecolor, specularcolor, isreflective, reflectivity, isrefractive, refractiveindex, texture, roughness, fresnel);
 	}
 	return Material(ks, kd, specularexponent, diffusecolor, specularcolor, isreflective, reflectivity, isrefractive, refractiveindex, roughness, fresnel);
