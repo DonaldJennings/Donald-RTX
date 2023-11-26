@@ -21,6 +21,7 @@ class Camera
 		void set_exposure(double exposure) { this->exposure = exposure; };
 		void set_num_bounces(int num_bounces) { this->num_bounces = num_bounces; };
 		void set_num_samples(int num_samples) { this->num_samples = num_samples; };
+		void set_aperature(double aperture) { this->aperture = aperture; };
 		void go_to(GeoVec camera_pos) { this->camera_pos = camera_pos; };
 		void setFOV(double fov) { this->fov = fov; };
 		void look_at(GeoVec look_at) { this->look_at_vec = look_at; };
@@ -39,6 +40,7 @@ class Camera
 		double fov;
 		double aspect_ratio;
 		double focal_length;
+		double aperture;
 		int num_bounces;
 
 		GeoVec u,v,w;

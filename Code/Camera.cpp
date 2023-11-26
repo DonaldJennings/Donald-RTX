@@ -17,7 +17,7 @@ Camera::Camera()
 	width = 720;
 	aspect_ratio = 16.0 / 9.0;
 	height = static_cast<int>(width / aspect_ratio);
-
+    
 	camera_pos = GeoVec(0.0, 0.0, 0.0);
 	look_at_vec = GeoVec(0.0, 0.0, 1.0);
 	up_vector = GeoVec(0.0, 1.0, 0.0);
@@ -115,13 +115,12 @@ Ray Camera::ray_from_pixel(int i, int j)
 
 Ray Camera::sample_ray_from_pixel(int i, int j)
 {
-    double aperture = 0.025;
     // Generate a random ray for the pixel (i,j)
     auto pixel_centre = pixel_origin + i*horizontal_pixel_change + j*vertical_pixel_change;
     auto random_point = pixel_centre + random_double()*horizontal_pixel_change + random_double()*vertical_pixel_change;
 
     // Generate a random point within the camera's aperture
-    GeoVec random_in_unit_circle = random_in_unit_disk() * aperture;
+    GeoVec random_in_unit_circle = random_in_unit_disk() * this->aperture;
 
     // Compute the ray origin and the focus point
     GeoVec ray_origin = camera_pos + random_in_unit_circle;

@@ -129,6 +129,16 @@ void setup_camera(Camera& camera, json& parsed_camera, int num_bounces, int num_
 	camera.set_num_bounces(num_bounces);
 	camera.set_num_samples(num_samples);
 
+	if (parsed_camera.find("aperture") != parsed_camera.end())
+	{
+		std::clog << "Aperture found" << std::endl;
+		camera.set_aperature(parsed_camera["aperture"]);
+		std::clog << "Aperture set to " << parsed_camera["aperture"] << std::endl;
+	} else {
+		camera.set_aperature(0.01);
+		std::clog << "Aperture to default value of 0.01" << std::endl;
+	}
+
 	camera.go_to(GeoVec(parsed_camera["position"][0], parsed_camera["position"][1], parsed_camera["position"][2]));
 	camera.look_at(GeoVec(parsed_camera["lookAt"][0], parsed_camera["lookAt"][1], parsed_camera["lookAt"][2]));
 	camera.set_up(GeoVec(parsed_camera["upVector"][0], parsed_camera["upVector"][1], parsed_camera["upVector"][2]));

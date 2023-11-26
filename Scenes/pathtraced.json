@@ -2,16 +2,18 @@
     "nbounces":8,
     "nsamples":16,
     "rendermode":"pathtrace",
+
     "camera":
         { 
             "type":"pinhole", 
-            "width":1200, 
-            "height":800,
+            "width":3840, 
+            "height":2160,
             "position":[0.0, 0.75, -0.25],
             "lookAt":[0.0, 0.35, 1.0],
             "upVector":[0.0, 1.0, 0.0],
             "fov":45.0,
-            "exposure":0.4
+            "exposure":0.4,
+            "aperture":0.025
         },
     "scene":
         { 
@@ -95,7 +97,7 @@
                             "reflectivity":1.0,
                             "isrefractive":false,
                             "refractiveindex":1.0 
-                        } 
+                    }
                 },
                 { 
                     "type":"sphere", 
@@ -111,7 +113,7 @@
                             "isreflective":false,
                             "reflectivity":1.0,
                             "isrefractive":true,
-                            "refractiveindex":1.9
+                            "refractiveindex":3.0
                         } 
                 },
                 { 

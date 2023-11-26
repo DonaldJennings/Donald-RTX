@@ -39,6 +39,8 @@ def generate_scenes(scene, output_folder='./video_scenes'):
     initial_velocity_blue_scuffed = -3.2
     intial_velocity_blue_flat = -2.9
     
+    current_aperture = scene['camera']['aperture']
+    
     # Move Camera around circle at center [0, 0.7, 2.25] by 1 degree each frame
     for i in range(NUM_FRAMES):
         angle = i
@@ -60,6 +62,8 @@ def generate_scenes(scene, output_folder='./video_scenes'):
         scene['camera']['lookAt'][0] = scene['scene']['shapes'][0]['center'][0]
         scene['camera']['lookAt'][1] = scene['scene']['shapes'][0]['center'][1]
         scene['camera']['lookAt'][2] = scene['scene']['shapes'][0]['center'][2]
+        scene['camera']['aperture'] = current_aperture
+        current_aperture += 0.0001
         
         with open(output_folder + 'video_test_frame_{:04d}.json'.format(i), 'w') as file:
             json.dump(scene, file)
