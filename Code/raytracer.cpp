@@ -59,11 +59,16 @@ void add_hittable_sphere(std::vector<std::shared_ptr<Hittable>>& shapes, json& p
 
 void add_hittable_cylinder(std::vector<std::shared_ptr<Hittable>>& shapes, json& parsed_cylinder, Material& material)
 {
-	auto center { GeoVec(parsed_cylinder["center"][0], parsed_cylinder["center"][1], parsed_cylinder["center"][2]) };
-	auto axis { GeoVec(parsed_cylinder["axis"][0], parsed_cylinder["axis"][1], parsed_cylinder["axis"][2]) };
+	GeoVec center { GeoVec(parsed_cylinder["center"][0], parsed_cylinder["center"][1], parsed_cylinder["center"][2]) };
+	GeoVec axis { normalize(GeoVec(parsed_cylinder["axis"][0], parsed_cylinder["axis"][1], parsed_cylinder["axis"][2])) };
 	double radius { parsed_cylinder["radius"].get<double>() };
 	double height { parsed_cylinder["height"].get<double>() };
-
+	std::clog << "Cylinder Details: " << std::endl;
+	std::clog << "Center: " << center << std::endl;
+	std::clog << "Axis: " << axis << std::endl;
+	std::clog << "Radius: " << radius << std::endl;
+	std::clog << "Height: " << height << std::endl;
+	
 	Cylinder cylinder(center, axis, radius, height);
 	cylinder.set_material(material);
 	shapes.push_back(std::make_shared<Cylinder>(cylinder));
@@ -164,7 +169,11 @@ int main(int argc, char** argv)
 	std::vector<std::shared_ptr<Hittable>> hittables;
 	for (auto& shape : parsed_scene["scene"]["shapes"])
 	{
-		Material material_obj = parse_material(shape["material"]);
+		Material material_obj;
+		if (shape.find("material") != shape.end())
+		{
+			material_obj = parse_material(shape["material"]);
+		}
 
 		if (shape["type"] == "sphere")
 		{

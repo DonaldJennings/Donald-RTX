@@ -15,8 +15,18 @@ public:
     Cylinder(GeoVec center, GeoVec axis, double radius, double height)
         : center(center), axis(axis), radius(radius), height(height) 
         {
-            GeoVec min = center - GeoVec(radius, height, radius);
-            GeoVec max = center + GeoVec(radius, height, radius);
+            GeoVec axis_normalized = normalize(axis);
+            GeoVec top = center + height * 0.5 * axis_normalized;
+            GeoVec bottom = center - height * 0.5 * axis_normalized;
+        
+            // Find two vectors perpendicular to the axis
+            GeoVec perp1 = normalize(cross(axis_normalized, abs(axis_normalized.x) > 0.1 ? GeoVec(0, 1, 0) : GeoVec(1, 0, 0)));
+            GeoVec perp2 = cross(axis_normalized, perp1);
+        
+            // Calculate the minimum and maximum points
+            GeoVec min = GeoVec(std::min(top.x, bottom.x) - radius, std::min(top.y, bottom.y) - radius, std::min(top.z, bottom.z) - radius);
+            GeoVec max = GeoVec(std::max(top.x, bottom.x) + radius, std::max(top.y, bottom.y) + radius, std::max(top.z, bottom.z) + radius);
+        
             box = BoundingBox(min, max);
         }
 
@@ -61,30 +71,31 @@ public:
         rec.shape = std::make_shared<Cylinder>(*this);
         rec.material = std::make_shared<Material>(mat);
 
-        return true;
+    return true;
     }
 
     // << COPILOT GENERATED >>
     bool check_cap_intersection(Ray& r, Interval ray_interval, HitRecord& rec, GeoVec cap_center, GeoVec cap_normal) const
     {
         double t = dot(cap_center - r.origin, cap_normal) / dot(r.direction, cap_normal);
-        if (t <= ray_interval.start() || t >= ray_interval.end())
+        if (t < ray_interval.start() - 1e-6 || ray_interval.end() + 1e-6 < t)
         {
             return false;
         }
 
         GeoVec p = r.at(t);
-        if (dot(p - cap_center, p - cap_center) > radius * radius) 
+
+        if ((p - cap_center).length_squared() > (radius * radius + 1e-6))
         {
             return false;
         }
 
-        // Set hit record
         rec.t = t;
         rec.point = p;
         rec.set_face_normal(r, cap_normal);
         rec.shape = std::make_shared<Cylinder>(*this);
         rec.material = std::make_shared<Material>(mat);
+
         return true;
     }
 
@@ -109,11 +120,12 @@ public:
     double find_root(Ray& r, Interval ray_interval) const
     {
         GeoVec oc = r.origin - center;
-        double a = dot(r.direction, r.direction) - pow(dot(r.direction, axis), 2);
-        double half_b = dot(oc, r.direction) - dot(oc, axis) * dot(r.direction, axis);
+        GeoVec dir = normalize(r.direction);
+        double a = dot(dir, dir) - pow(dot(dir, axis), 2);
+        double half_b = dot(oc, dir) - dot(oc, axis) * dot(dir, axis);
         double c = dot(oc, oc) - pow(dot(oc, axis), 2) - radius * radius;
         double discriminant = half_b * half_b - a * c;
-
+        
         if (discriminant < 0) return -1;
         double sqrtd = sqrt(discriminant);
 
@@ -122,6 +134,10 @@ public:
         if (root < ray_interval.start() || ray_interval.end() < root)
         {
             root = (-half_b + sqrtd) / a;
+            if (root < ray_interval.start() || ray_interval.end() < root)
+            {
+                return -1;
+            }
         }
 
         return root;
