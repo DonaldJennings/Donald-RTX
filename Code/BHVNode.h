@@ -72,7 +72,7 @@ public:
     {
         BoundingBox box_a = a->bounding_box();
         BoundingBox box_b = b->bounding_box();
-        return a->bounding_box().get_axis(axis).start() < b->bounding_box().get_axis(axis).start();
+        return a->bounding_box()[axis].start() < b->bounding_box()[axis].start();
     }
 
     static bool compare_box_min_x(std::shared_ptr<Hittable> a, std::shared_ptr<Hittable> b)

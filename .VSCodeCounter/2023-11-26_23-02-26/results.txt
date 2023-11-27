@@ -1,0 +1,56 @@
+Date : 2023-11-26 23:02:26
+Directory : c:\Programming\donald-rtx\Code
+Total : 29 files,  19078 codes, 4432 comments, 3317 blanks, all 26827 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| C++      |         28 |     19,064 |      4,425 |      3,308 |     26,797 |
+| Makefile |          1 |         14 |          7 |          9 |         30 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                 | files      | code       | comment    | blank      | total      |
++------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                    |         29 |     19,078 |      4,432 |      3,317 |     26,827 |
+| . (Files)                                            |         27 |      1,568 |         64 |        328 |      1,960 |
+| nlohmann                                             |          2 |     17,510 |      4,368 |      2,989 |     24,867 |
++------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                             | language | code       | comment    | blank      | total      |
++------------------------------------------------------+----------+------------+------------+------------+------------+
+| c:\Programming\donald-rtx\Code\BHVNode.h             | C++      |         76 |          1 |         17 |         94 |
+| c:\Programming\donald-rtx\Code\BinaryRender.h        | C++      |         19 |          0 |          5 |         24 |
+| c:\Programming\donald-rtx\Code\BlinnPhong.h          | C++      |        154 |          4 |         21 |        179 |
+| c:\Programming\donald-rtx\Code\BoundingBox.h         | C++      |         74 |          1 |         19 |         94 |
+| c:\Programming\donald-rtx\Code\Camera.cpp            | C++      |        113 |          5 |         27 |        145 |
+| c:\Programming\donald-rtx\Code\Camera.h              | C++      |         57 |          3 |          6 |         66 |
+| c:\Programming\donald-rtx\Code\Cylinder.h            | C++      |        121 |          5 |         28 |        154 |
+| c:\Programming\donald-rtx\Code\GeoVec.h              | C++      |        126 |          3 |         26 |        155 |
+| c:\Programming\donald-rtx\Code\HitRecord.h           | C++      |         18 |          1 |          6 |         25 |
+| c:\Programming\donald-rtx\Code\Hittable.h            | C++      |         16 |          0 |          5 |         21 |
+| c:\Programming\donald-rtx\Code\Interval.h            | C++      |         31 |          0 |          7 |         38 |
+| c:\Programming\donald-rtx\Code\Light.h               | C++      |         21 |          3 |          7 |         31 |
+| c:\Programming\donald-rtx\Code\Makefile              | Makefile |         14 |          7 |          9 |         30 |
+| c:\Programming\donald-rtx\Code\Material.h            | C++      |         40 |          1 |          7 |         48 |
+| c:\Programming\donald-rtx\Code\PPMWriter.cpp         | C++      |         21 |          1 |          8 |         30 |
+| c:\Programming\donald-rtx\Code\PPMWriter.h           | C++      |         10 |          0 |          3 |         13 |
+| c:\Programming\donald-rtx\Code\Pathtrace.h           | C++      |        148 |         14 |         26 |        188 |
+| c:\Programming\donald-rtx\Code\Ray.cpp               | C++      |         10 |          0 |          2 |         12 |
+| c:\Programming\donald-rtx\Code\Ray.h                 | C++      |         12 |          1 |          3 |         16 |
+| c:\Programming\donald-rtx\Code\RenderMode.h          | C++      |         12 |          0 |          3 |         15 |
+| c:\Programming\donald-rtx\Code\Sphere.h              | C++      |         71 |          2 |         12 |         85 |
+| c:\Programming\donald-rtx\Code\Texture.h             | C++      |         44 |          4 |         11 |         59 |
+| c:\Programming\donald-rtx\Code\Triangle.h            | C++      |         82 |          1 |         19 |        102 |
+| c:\Programming\donald-rtx\Code\World.h               | C++      |         59 |          0 |         12 |         71 |
+| c:\Programming\donald-rtx\Code\nlohmann\json.hpp     | C++      |     17,408 |      4,325 |      2,957 |     24,690 |
+| c:\Programming\donald-rtx\Code\nlohmann\json_fwd.hpp | C++      |        102 |         43 |         32 |        177 |
+| c:\Programming\donald-rtx\Code\raytracer.cpp         | C++      |        200 |          7 |         35 |        242 |
+| c:\Programming\donald-rtx\Code\utils.cpp             | C++      |         14 |          0 |          2 |         16 |
+| c:\Programming\donald-rtx\Code\utils.h               | C++      |          5 |          0 |          2 |          7 |
+| Total                                                |          |     19,078 |      4,432 |      3,317 |     26,827 |
++------------------------------------------------------+----------+------------+------------+------------+------------+

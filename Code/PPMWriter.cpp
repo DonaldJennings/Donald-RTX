@@ -15,14 +15,12 @@ void PPMWriter::writePixel(std::ostream& out, GeoVec colour, double exposure)
 	colour.y = 1 - exp(-colour.y * exposure);
 	colour.z = 1 - exp(-colour.z * exposure);
 
-
-	double gamma = 2.2;  // Adjust this value as needed.
+	double gamma = 2.2;
 	colour.x = pow(colour.x, 1.0 / gamma);
 	colour.y = pow(colour.y, 1.0 / gamma);
 	colour.z = pow(colour.z, 1.0 / gamma);
 
 	static const Interval intensity = Interval(0, 0.999);
-	// Write the translated [0,255] value of each color component.
 	out << static_cast<int>(255.990 * intensity.clamp(colour.x)) << ' '
 		<< static_cast<int>(255.999 * intensity.clamp(colour.y)) << ' '
 		<< static_cast<int>(255.999 * intensity.clamp(colour.z)) << '\n';

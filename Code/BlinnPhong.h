@@ -43,6 +43,8 @@ public:
         {
             refracted_color = compute_refracted_color(hitRecord, world, ray, depth);
             refracted_color = 1.0 * refracted_color;
+            diffuse_color = GeoVec(0, 0, 0);
+            specular_color = GeoVec(0, 0, 0);
         }
         
         return ambient_color + diffuse_color + specular_color + reflected_color + refracted_color;

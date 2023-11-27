@@ -1,5 +1,6 @@
 {
     "nbounces":8, 
+    "nsamples":16,
     "rendermode":"pathtrace",
     "camera":
         { 

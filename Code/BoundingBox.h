@@ -49,6 +49,12 @@ public:
 
     }
 
+    // define function to get interval of a given axis from [] operator
+    Interval operator[](int axis) const
+    {
+        return get_axis(axis);
+    }
+
 bool hit(const Ray& r, Interval ray_t) const {
     double epsilon = 0.0001;  // Adjust this value as needed.
     for (int a = 0; a < 3; a++) {

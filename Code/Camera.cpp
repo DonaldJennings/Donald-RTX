@@ -103,7 +103,6 @@ void Camera::render(World& world, RenderMode& render_mode)
     auto endTimer = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = endTimer - startTimer;
     std::clog << "\rRender time: " << std::fixed << std::setprecision(2) << elapsed.count() << "seconds";
-
 }
 
 Ray Camera::ray_from_pixel(int i, int j)
@@ -117,7 +116,6 @@ Ray Camera::sample_ray_from_pixel(int i, int j)
 {
     // Generate a random ray for the pixel (i,j)
     auto pixel_centre = pixel_origin + i*horizontal_pixel_change + j*vertical_pixel_change;
-    auto random_point = pixel_centre + random_double()*horizontal_pixel_change + random_double()*vertical_pixel_change;
 
     // Generate a random point within the camera's aperture
     GeoVec random_in_unit_circle = random_in_unit_disk() * this->aperture;

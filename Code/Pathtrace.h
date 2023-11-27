@@ -130,18 +130,13 @@ private:
         double D = (alpha * alpha) / (M_PI * pow((1 + (alpha * alpha - 1) * NdotH * NdotH), 2));
 
         double cook_torrance = F * G * D / (4 * NdotV * NdotL);
-
-        // Make sure cookTorrance is clamped to [0, 1] if needed
-        // std::clog << "CG Value " << cook_torrance << std::endl;
-        // Now you can use cookTorrance as a multiplier for your diffuse color
         GeoVec specularColor = hitRecord.material->specularColor;
         GeoVec diffuseColor = hitRecord.material->diffuseColor;
 
-        GeoVec reflectedDir = reflect(V, N); // Assuming you have a function to compute reflection
+        GeoVec reflectedDir = reflect(V, N);
         scattered = Ray(hitRecord.point, normalize(reflectedDir));
 
         attenuation = GeoVec(1.0, 1.0, 1.0) - F * specularColor * cook_torrance;
-        // attenuation = diffuseColor * (1.0 - cook_torrance) + specularColor * cook_torrance;
         return true;
     };
 
